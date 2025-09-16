@@ -22,6 +22,47 @@ let lastFetchTime: number = 0;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 /**
+ * Parse CSV line with proper handling of quoted fields containing commas
+ */
+function parseCSVLine(line: string): string[] {
+  const result: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  let i = 0;
+  
+  while (i < line.length) {
+    const char = line[i];
+    
+    if (char === '"') {
+      // Handle quotes
+      if (inQuotes && i + 1 < line.length && line[i + 1] === '"') {
+        // Escaped quote ("")
+        current += '"';
+        i += 2;
+      } else {
+        // Toggle quote state
+        inQuotes = !inQuotes;
+        i++;
+      }
+    } else if (char === ',' && !inQuotes) {
+      // Comma outside quotes - end of field
+      result.push(current.trim());
+      current = '';
+      i++;
+    } else {
+      // Regular character
+      current += char;
+      i++;
+    }
+  }
+  
+  // Add the last field
+  result.push(current.trim());
+  
+  return result;
+}
+
+/**
  * Parse CSV text into structured data
  * Special handling for sheets where data starts after header rows
  */
@@ -57,13 +98,13 @@ function parseCSV(csvText: string): RawDeviceRow[] {
   console.log(`📍 Header row: ${headerRowIndex + 1}, Data starts: ${dataStartRow + 1}`);
   console.log(`📄 Header line: ${lines[headerRowIndex]?.substring(0, 200)}`);
   
-  const headers = lines[headerRowIndex]?.split(',').map(h => h.trim().replace(/"/g, '')) || [];
+  const headers = parseCSVLine(lines[headerRowIndex] || '').map(h => h.replace(/"/g, ''));
   console.log(`📊 Parsed headers (${headers.length}):`, headers.slice(0, 10));
   
   const rows: RawDeviceRow[] = [];
   
   for (let i = dataStartRow; i < lines.length; i++) {
-    const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+    const values = parseCSVLine(lines[i]).map(v => v.replace(/"/g, ''));
     if (values.length >= headers.length && values.some(v => v.trim())) {
       const row: RawDeviceRow = {};
       headers.forEach((header, index) => {
@@ -198,6 +239,23 @@ function processDeviceData(rawData: RawDeviceRow[]): Record<string, DeviceData> 
       const msrp = parsePrice(msrpValue);
       if (msrp <= 0) {
         console.log(`⚠️ Skipping ${phoneName}: invalid MSRP (${msrpValue})`);
+        skippedCount++;
+        continue;
+      }
+      
+      // Debug: Log suspicious prices and their raw data
+      if (msrp <= 2) {
+        console.log(`🚨 SUSPICIOUS PRICE DETECTED:`);
+        console.log(`   Device: ${phoneName}`);
+        console.log(`   Raw MSRP Value: "${msrpValue}"`);
+        console.log(`   Parsed MSRP: $${msrp}`);
+        console.log(`   Full row data:`, row);
+        console.log(`   MSRP Column: "${msrpCol}"`);
+        
+        // Let's see ALL column values for this row
+        console.log(`   All row values:`, Object.keys(row).map(key => `${key}: "${row[key]}"`));
+        
+        // Skip devices with suspicious prices to avoid polluting the data
         skippedCount++;
         continue;
       }

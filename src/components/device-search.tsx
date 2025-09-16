@@ -67,7 +67,16 @@ export function DeviceSearch({ value, onSelect, placeholder = "Search devices...
           <CommandGroup className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
             {devices.map((deviceName) => {
               const deviceData = getDeviceData(deviceName)
-              if (!deviceData) return null
+              if (!deviceData) {
+                console.log(`❌ No device data found for: ${deviceName}`);
+                return null;
+              }
+              
+              // Debug: Log devices with suspicious prices
+              if (deviceData.msrp <= 2) {
+                console.log(`🚨 Suspicious price for ${deviceName}: $${deviceData.msrp}`);
+                console.log(`   Raw device data:`, deviceData);
+              }
               
               return (
                 <CommandItem
