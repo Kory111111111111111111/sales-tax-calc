@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { DeviceSearch } from "@/components/device-search";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { CustomStarsBackground } from "@/components/custom-stars-background";
 import { 
   getAllStates, 
   getTaxRate, 
@@ -131,78 +131,88 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header with Theme Toggle */}
-        <div className="flex justify-between items-start mb-8">
-          <div className="flex-1" />
-          <div className="text-center flex-1">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
-                <Calculator className="h-8 w-8 text-blue-600" />
+    <CustomStarsBackground 
+      className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800"
+      starColor="rgba(147, 197, 253, 0.6)"
+      speed={60}
+      factor={0.03}
+      starLayers={[
+        { count: 3000, size: 0.5, speedMultiplier: 0.5 },
+        { count: 2000, size: 1, speedMultiplier: 1 },
+        { count: 1200, size: 1.5, speedMultiplier: 1.5 },
+        { count: 800, size: 2, speedMultiplier: 2 },
+        { count: 400, size: 2.5, speedMultiplier: 2.5 },
+        { count: 200, size: 3, speedMultiplier: 3 },
+        { count: 100, size: 4, speedMultiplier: 4 },
+      ]}
+    >
+      <div className="container mx-auto px-4 py-4 relative z-10">
+        {/* Header */}
+        <div className="flex justify-center items-start mb-4">
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
+                <Calculator className="h-6 w-6 text-blue-600" />
               </div>
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
                 Sales Tax Calculator
               </h1>
             </div>
-            <div className="flex justify-center gap-4 mt-6">
-              <Badge variant="outline" className="text-sm">50 US States</Badge>
-              <Badge variant="outline" className="text-sm">Real-time Calculation</Badge>
-              <Badge variant="outline" className="text-sm">Device Catalog</Badge>
+            <div className="flex justify-center gap-2 flex-wrap">
+              <Badge variant="outline" className="text-xs">50 US States</Badge>
+              <Badge variant="outline" className="text-xs">Real-time Calculation</Badge>
+              <Badge variant="outline" className="text-xs">Device Catalog</Badge>
               {isLoadingDevices && (
-                <Badge variant="secondary" className="text-sm">Loading Devices...</Badge>
+                <Badge variant="secondary" className="text-xs">Loading Devices...</Badge>
               )}
               {deviceLoadError && (
-                <Badge variant="destructive" className="text-sm">Google Sheets Error</Badge>
+                <Badge variant="destructive" className="text-xs">Google Sheets Error</Badge>
               )}
             </div>
           </div>
-          <div className="flex-1 flex justify-end">
-            <ThemeToggle />
-          </div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 max-w-7xl mx-auto">
           {/* Popular Devices */}
           <div className="xl:col-span-1 order-2 xl:order-1">
             <Card className="h-fit">
-              <CardHeader>
+              <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Smartphone className="h-5 w-5 text-blue-600" />
-                    <CardTitle>Popular Devices</CardTitle>
+                    <Smartphone className="h-4 w-4 text-blue-600" />
+                    <CardTitle className="text-base">Popular Devices</CardTitle>
                   </div>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={handleRefreshDevices}
                     disabled={isLoadingDevices}
-                    className="h-8 w-8 p-0"
+                    className="h-6 w-6 p-0"
                   >
-                    <RefreshCw className={`h-4 w-4 ${isLoadingDevices ? 'animate-spin' : ''}`} />
+                    <RefreshCw className={`h-3 w-3 ${isLoadingDevices ? 'animate-spin' : ''}`} />
                   </Button>
                 </div>
-                <CardDescription>
+                <CardDescription className="text-xs">
                   Quick select from popular mobile devices
                   {isLoadingDevices && " (Loading...)"}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-2 pt-0">
                 {popularDevices.map((device) => (
                   <div
                     key={device.name}
-                    className={`p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md hover:scale-[1.02] ${
+                    className={`p-3 rounded-lg border cursor-pointer transition-all hover:shadow-md hover:scale-[1.02] ${
                       selectedDevice === device.name
                         ? "border-blue-500 bg-blue-50 dark:bg-blue-950 shadow-md"
                         : "border-border hover:border-blue-300"
                     }`}
                     onClick={() => handleDeviceSelect(device)}
                   >
-                    <div className="flex justify-between items-start mb-2">
-                      <h4 className="font-medium text-sm leading-tight">
+                    <div className="flex justify-between items-start mb-1">
+                      <h4 className="font-medium text-xs leading-tight">
                         {device.data.displayName || device.name}
                       </h4>
-                      <Badge variant="secondary" className="text-xs font-bold">
+                      <Badge variant="secondary" className="text-xs font-bold px-1 py-0">
                         {formatCurrency(device.data.msrp)}
                       </Badge>
                     </div>
@@ -213,11 +223,6 @@ export default function Home() {
                     )}
                   </div>
                 ))}
-                <div className="text-center pt-2">
-                  <p className="text-xs text-muted-foreground">
-                    Use the search above to find more devices
-                  </p>
-                </div>
               </CardContent>
             </Card>
           </div>
@@ -225,21 +230,21 @@ export default function Home() {
           {/* Main Calculator */}
           <div className="xl:col-span-2 order-1 xl:order-2">
             <Card className="shadow-lg">
-              <CardHeader className="bg-card dark:bg-card border-b border-border">
-                <CardTitle className="text-xl">Tax Calculator</CardTitle>
-                <CardDescription>
+              <CardHeader className="bg-card dark:bg-card border-b border-border pb-3">
+                <CardTitle className="text-lg">Tax Calculator</CardTitle>
+                <CardDescription className="text-sm">
                   Enter an amount or select a device to calculate sales tax
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6 p-6">
+              <CardContent className="space-y-4 p-4">
                 {/* State Selection */}
-                <div className="space-y-2">
-                  <Label htmlFor="state-select" className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
+                <div className="space-y-1">
+                  <Label htmlFor="state-select" className="flex items-center gap-2 text-sm">
+                    <MapPin className="h-3 w-3" />
                     Select State
                   </Label>
                   <Select value={selectedState} onValueChange={setSelectedState}>
-                    <SelectTrigger id="state-select">
+                    <SelectTrigger id="state-select" className="h-9">
                       <SelectValue placeholder="Choose a state" />
                     </SelectTrigger>
                     <SelectContent>
@@ -253,8 +258,8 @@ export default function Home() {
                 </div>
 
                 {/* Amount Input */}
-                <div className="space-y-2">
-                  <Label htmlFor="amount-input">Amount</Label>
+                <div className="space-y-1">
+                  <Label htmlFor="amount-input" className="text-sm">Amount</Label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
                       $
@@ -265,20 +270,20 @@ export default function Home() {
                       placeholder="0.00"
                       value={amount}
                       onChange={(e) => handleManualAmountChange(e.target.value)}
-                      className="pl-8"
+                      className="pl-8 h-9"
                       step="0.01"
                       min="0"
                     />
                   </div>
                   {useDevicePrice && selectedDevice && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <span>Price from: {getDeviceData(selectedDevice)?.displayName || selectedDevice}</span>
                       {getDeviceData(selectedDevice)?.prepaid && (
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={handlePrepaidToggle}
-                          className="h-6 text-xs"
+                          className="h-5 text-xs px-2"
                         >
                           {usePrepaidPrice ? "Switch to MSRP" : "Use Prepaid Price"}
                         </Button>
@@ -288,9 +293,9 @@ export default function Home() {
                 </div>
 
                 {/* Device Search */}
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Search className="h-4 w-4" />
+                <div className="space-y-1">
+                  <Label className="flex items-center gap-2 text-sm">
+                    <Search className="h-3 w-3" />
                     Search All Devices
                   </Label>
                   <DeviceSearch
@@ -309,39 +314,39 @@ export default function Home() {
 
                 {/* Results */}
                 {currentAmount > 0 && (
-                  <div className="space-y-4 bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-800 dark:to-blue-950 p-6 rounded-xl border">
-                    <h3 className="font-semibold text-lg flex items-center gap-2">
-                      <Calculator className="h-5 w-5 text-blue-600" />
+                  <div className="space-y-3 bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-800 dark:to-blue-950 p-4 rounded-xl border">
+                    <h3 className="font-semibold text-base flex items-center gap-2">
+                      <Calculator className="h-4 w-4 text-blue-600" />
                       Tax Calculation
                     </h3>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="text-center p-6 bg-white dark:bg-slate-900 rounded-xl shadow-sm border">
-                        <p className="text-sm font-medium text-muted-foreground mb-2">Original Amount</p>
-                        <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div className="text-center p-4 bg-white dark:bg-slate-900 rounded-xl shadow-sm border">
+                        <p className="text-xs font-medium text-muted-foreground mb-1">Original Amount</p>
+                        <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                           {formatCurrency(currentAmount)}
                         </p>
                       </div>
                       
-                      <div className="text-center p-6 bg-white dark:bg-slate-900 rounded-xl shadow-sm border">
-                        <p className="text-sm font-medium text-muted-foreground mb-2">
+                      <div className="text-center p-4 bg-white dark:bg-slate-900 rounded-xl shadow-sm border">
+                        <p className="text-xs font-medium text-muted-foreground mb-1">
                           Sales Tax ({formatPercentage(taxRate)})
                         </p>
-                        <p className="text-3xl font-bold text-orange-600">
+                        <p className="text-2xl font-bold text-orange-600">
                           {formatCurrency(taxCalculation.taxAmount)}
                         </p>
                       </div>
                       
-                      <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 rounded-xl border-2 border-blue-200 dark:border-blue-700 shadow-md">
-                        <p className="text-sm font-medium text-muted-foreground mb-2">Total Amount</p>
-                        <p className="text-3xl font-bold text-blue-600">
+                      <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 rounded-xl border-2 border-blue-200 dark:border-blue-700 shadow-md">
+                        <p className="text-xs font-medium text-muted-foreground mb-1">Total Amount</p>
+                        <p className="text-2xl font-bold text-blue-600">
                           {formatCurrency(taxCalculation.totalAmount)}
                         </p>
                       </div>
                     </div>
 
-                    <div className="text-center p-4 bg-white/50 dark:bg-slate-800/50 rounded-lg">
-                      <p className="text-sm text-muted-foreground">
+                    <div className="text-center p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg">
+                      <p className="text-xs text-muted-foreground">
                         Tax rate for <span className="font-medium">{selectedState}</span>: {formatPercentage(taxRate)}
                         {taxRate === 0 && " (No state sales tax)"}
                       </p>
@@ -350,9 +355,9 @@ export default function Home() {
                 )}
 
                 {currentAmount === 0 && (
-                  <div className="text-center p-12 text-muted-foreground bg-slate-50 dark:bg-slate-800 rounded-xl">
-                    <Calculator className="h-16 w-16 mx-auto mb-4 opacity-30" />
-                    <h3 className="text-lg font-medium mb-2">Ready to Calculate</h3>
+                  <div className="text-center p-8 text-muted-foreground bg-slate-50 dark:bg-slate-800 rounded-xl">
+                    <Calculator className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                    <h3 className="text-base font-medium mb-1">Ready to Calculate</h3>
                     <p className="text-sm">Enter an amount or select a device to calculate sales tax</p>
                   </div>
                 )}
@@ -360,22 +365,7 @@ export default function Home() {
             </Card>
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="text-center mt-12 pt-8 border-t border-slate-200 dark:border-slate-700">
-          <div className="max-w-3xl mx-auto">
-            <p className="text-sm text-muted-foreground mb-4">
-              Sales tax rates are state-level only and do not include local taxes. 
-              Rates are current as of 2024 and may be subject to change.
-            </p>
-            <div className="flex justify-center gap-6 text-xs text-muted-foreground">
-              <span>🏛️ Official State Rates</span>
-              <span>📱 Latest Device Prices</span>
-              <span>⚡ Instant Calculations</span>
-            </div>
-          </div>
-        </div>
       </div>
-    </div>
+    </CustomStarsBackground>
   );
 }
