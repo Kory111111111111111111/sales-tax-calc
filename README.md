@@ -1,40 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# Sales Tax Calculator
 
-## Getting Started
+A modern, responsive web application for calculating sales tax across all 50 US states. Built with Next.js, React, TailwindCSS, and Shadcn/ui components.
 
-First, run the development server:
+## 🚀 Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **State Sales Tax Calculator**: Calculate tax for all 50 US states with current 2024 rates
+- **Device Catalog**: Pre-loaded with popular mobile devices and their MSRP/prepaid prices
+- **Smart Search**: Advanced device search with autocomplete functionality
+- **Responsive Design**: Works perfectly on desktop, tablet, and mobile devices
+- **Modern UI**: Built with Shadcn/ui components and TailwindCSS
+- **GitHub Pages Ready**: Optimized for static deployment
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ Technology Stack
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+- **Next.js 15** - React framework for production
+- **React 19** - Modern React with latest features
+- **TypeScript** - Type-safe development
+- **TailwindCSS 4** - Utility-first CSS framework
+- **Shadcn/ui** - High-quality, accessible UI components
+- **Lucide React** - Beautiful, customizable icons
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+## 📱 What You Can Do
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+1. **Manual Calculation**: Enter any amount and select a state to calculate sales tax
+2. **Device Selection**: Choose from popular devices or search the entire catalog
+3. **Price Options**: Toggle between MSRP and prepaid pricing where available
+4. **Real-time Results**: See instant calculations with detailed breakdowns
+5. **Mobile Friendly**: Use on any device with responsive design
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🏗️ Installation & Development
 
-## Learn More
+1. **Clone the repository**
+   ```bash
+   git clone <your-repo-url>
+   cd sales-tax-calc
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+3. **Run development server**
+   ```bash
+   npm run dev
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+4. **Open in browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
 
-## Deploy on Vercel
+## 🌐 Deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This app is configured for GitHub Pages deployment:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+1. **Build for production**
+   ```bash
+   npm run build
+   ```
+
+2. **Deploy to GitHub Pages**
+   - Push to your main branch
+   - GitHub Actions will automatically build and deploy
+   - Enable GitHub Pages in repository settings
+
+## 📊 Sales Tax Information
+
+- **Coverage**: All 50 US states
+- **Accuracy**: State-level sales tax rates (local taxes not included)
+- **Currency**: 2024 rates, updated annually
+- **No Tax States**: Alaska, Delaware, Montana, New Hampshire, Oregon
+
+## 🎨 UI Components
+
+Built with Shadcn/ui components:
+- Cards for layout structure
+- Select dropdowns for state selection
+- Input fields with proper validation
+- Buttons with hover states
+- Badges for price display
+- Command palette for device search
+- Responsive grid system
+
+## 🔧 Configuration
+
+The app is pre-configured with:
+- Static export for GitHub Pages
+- TypeScript for type safety
+- ESLint for code quality
+- Responsive breakpoints
+- Dark mode support
+- Optimized images
+
+## 📝 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 🌟 Acknowledgments
+
+- Original Python Flask application for the core calculation logic
+- Shadcn/ui for the beautiful component library
+- Next.js team for the excellent framework
+- TailwindCSS for the utility-first CSS approach
