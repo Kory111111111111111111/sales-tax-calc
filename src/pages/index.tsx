@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { AuroraText } from "@/components/ui/aurora-text";
 import { DeviceSearch } from "@/components/device-search";
 import { CustomStarsBackground } from "@/components/custom-stars-background";
 import { 
@@ -151,11 +152,20 @@ export default function Home() {
         <div className="flex justify-center items-start mb-4">
           <div className="text-center">
             <div className="flex items-center justify-center gap-2 mb-3">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
-                <Calculator className="h-6 w-6 text-blue-600" />
-              </div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
-                Sales Tax Calculator
+              <h1 className="text-3xl font-bold">
+                <AuroraText 
+                  colors={[
+                    "oklch(0.45 0.08 224)", 
+                    "oklch(0.55 0.12 220)", 
+                    "oklch(0.65 0.15 216)", 
+                    "oklch(0.50 0.10 228)", 
+                    "oklch(0.60 0.13 212)"
+                  ]}
+                  speed={1.2}
+                  className="text-3xl font-bold"
+                >
+                  Sales Tax Calculator
+                </AuroraText>
               </h1>
             </div>
             <div className="flex justify-center gap-2 flex-wrap">

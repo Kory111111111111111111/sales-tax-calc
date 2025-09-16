@@ -43,9 +43,11 @@ export function DeviceSearch({ value, onSelect, placeholder = "Search devices...
         >
           {value ? (
             <div className="flex justify-between items-center w-full">
-              <span className="truncate">{getDeviceData(value)?.displayName || value}</span>
+              <span className="font-medium truncate flex-1 mr-4">
+                {value}
+              </span>
               {selectedDevice && (
-                <span className="text-muted-foreground text-sm">
+                <span className="text-muted-foreground text-sm flex-shrink-0">
                   {formatCurrency(selectedDevice.msrp)}
                 </span>
               )}
@@ -97,13 +99,8 @@ export function DeviceSearch({ value, onSelect, placeholder = "Search devices...
                   <div className="flex justify-between items-center w-full min-w-0">
                     <div className="flex flex-col min-w-0 flex-1 mr-4">
                       <span className="font-medium truncate">
-                        {deviceData.displayName || deviceName}
+                        {deviceName}
                       </span>
-                      {deviceData.displayName && deviceName !== deviceData.displayName && (
-                        <span className="text-xs text-muted-foreground truncate">
-                          {deviceName}
-                        </span>
-                      )}
                     </div>
                     <div className="text-right flex-shrink-0">
                       <span className="text-sm font-medium">
