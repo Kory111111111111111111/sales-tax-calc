@@ -123,6 +123,11 @@
   --color-shadow-color: var(--shadow-color);
   --color-destructive-foreground: var(--destructive-foreground);
   --animate-aurora: aurora 8s ease-in-out infinite alternate;
+  --animate-fade-in: fadeIn 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --animate-slide-up: slideUp 180ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --animate-scale-in: scaleIn 150ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --animate-bounce-subtle: bounceSubtle 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  
   @keyframes aurora {
   0% {
     background-position: 0% 50%;
@@ -143,6 +148,50 @@
   100% {
     background-position: 0% 50%;
     transform: rotate(-5deg) scale(0.9);
+    }
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateZ(0);
+    }
+    to {
+      opacity: 1;
+      transform: translateZ(0);
+    }
+  }
+  
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateZ(0) translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateZ(0) translateY(0);
+    }
+  }
+  
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: translateZ(0) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateZ(0) scale(1);
+    }
+  }
+  
+  @keyframes bounceSubtle {
+    from {
+      opacity: 0;
+      transform: translateZ(0) scale(0.8);
+    }
+    to {
+      opacity: 1;
+      transform: translateZ(0) scale(1);
     }
   }
 }
@@ -232,22 +281,147 @@ html {
   }
 }
 
+/* Custom animation classes */
+.animate-fade-in {
+  animation: var(--animate-fade-in);
+}
+
+.animate-slide-up {
+  animation: var(--animate-slide-up);
+}
+
+.animate-scale-in {
+  animation: var(--animate-scale-in);
+}
+
+.animate-bounce-subtle {
+  animation: var(--animate-bounce-subtle);
+}
+
 /* Performance optimizations for smooth interactions */
 * {
   /* Enable hardware acceleration for transforms and opacity */
   will-change: auto;
 }
 
+/* Enhanced transition defaults for ultra-smooth animations */
 .transition-all {
   /* Force GPU acceleration for smooth transitions */
   transform: translateZ(0);
   backface-visibility: hidden;
   perspective: 1000px;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition-delay: 0ms;
 }
 
-button, .cursor-pointer {
-  /* Optimize interactive elements */
+/* Immediate visual feedback for interactive elements */
+button, .cursor-pointer, [role="combobox"], [role="option"] {
+  /* Optimize interactive elements for immediate response */
+  will-change: transform, opacity, background-color, border-color;
+  transform: translateZ(0);
+  transition: all 0ms;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* Immediate hover states */
+button:hover, .cursor-pointer:hover {
+  transition: all 50ms ease-out;
+}
+
+/* Instant active states for immediate feedback */
+button:active, .cursor-pointer:active, [role="combobox"]:active {
+  transform: translateZ(0) scale(0.98) !important;
+  transition: all 0ms !important;
+  opacity: 0.9;
+}
+
+/* Remove touch delays */
+* {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Enhanced popover and dropdown animations */
+[data-radix-popper-content-wrapper] {
   will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+/* Smooth hover states */
+button:hover, .cursor-pointer:hover {
+  transform: translateZ(0) scale(1.02);
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:active, .cursor-pointer:active {
+  transform: translateZ(0) scale(0.98);
+  transition: all 100ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced command item animations */
+[data-slot="command-item"] {
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateZ(0);
+}
+
+[data-slot="command-item"]:hover {
+  transform: translateZ(0) translateX(2px);
+}
+
+/* Smooth content area transitions */
+.bg-gradient-to-br {
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Optimize scroll performance */
+.overflow-y-auto {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Instant visual feedback for all interactive elements */
+[role="button"], [role="combobox"], [role="option"], button, .cursor-pointer {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  pointer-events: auto;
+}
+
+/* Immediate active state feedback */
+[role="button"]:active,
+[role="combobox"]:active,
+[role="option"]:active,
+button:active,
+.cursor-pointer:active {
+  transform: scale(0.97) translateZ(0) !important;
+  filter: brightness(0.95) !important;
+  transition: none !important;
+}
+
+/* Remove any potential delays */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeSpeed;
+}
+
+/* Enhanced focus states with smooth transitions */
+input:focus, select:focus, [role="combobox"]:focus {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateZ(0);
+}
+
+/* Card animations */
+.shadow-lg, .shadow-md, .shadow-sm {
+  transition: box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1), transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateZ(0);
 }
 

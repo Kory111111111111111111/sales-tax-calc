@@ -131,7 +131,7 @@ export default function Home() {
 
           {/* Main Calculator */}
           <div className="lg:col-span-2 order-1 lg:order-2">
-            <Card className="shadow-lg">
+            <Card className="shadow-lg animate-scale-in">
               <CardHeader className="bg-card dark:bg-card border-b border-border pb-3">
                 <CardTitle className="text-lg">Tax Calculator</CardTitle>
                 <CardDescription className="text-sm">
@@ -217,21 +217,21 @@ export default function Home() {
 
                 {/* Results */}
                 {currentAmount > 0 && (
-                  <div className="space-y-3 bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-800 dark:to-blue-950 p-4 rounded-xl border">
+                  <div className="space-y-3 bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-800 dark:to-blue-950 p-4 rounded-xl border transition-opacity duration-150 ease-out transform-gpu">
                     <h3 className="font-semibold text-base flex items-center gap-2">
                       <Calculator className="h-4 w-4 text-blue-600" />
                       Tax Calculation
                     </h3>
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                      <div className="text-center p-4 bg-white dark:bg-slate-900 rounded-xl shadow-sm border">
+                      <div className="text-center p-4 bg-white dark:bg-slate-900 rounded-xl shadow-sm border transition-all duration-120 ease-out hover:shadow-sm transform-gpu">
                         <p className="text-xs font-medium text-muted-foreground mb-1">Original Amount</p>
                         <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                           {formatCurrency(currentAmount)}
                         </p>
                       </div>
                       
-                      <div className="text-center p-4 bg-white dark:bg-slate-900 rounded-xl shadow-sm border">
+                      <div className="text-center p-4 bg-white dark:bg-slate-900 rounded-xl shadow-sm border transition-all duration-120 ease-out hover:shadow-sm transform-gpu">
                         <p className="text-xs font-medium text-muted-foreground mb-1">
                           Sales Tax ({formatPercentage(taxRate)})
                         </p>
@@ -240,7 +240,7 @@ export default function Home() {
                         </p>
                       </div>
                       
-                      <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 rounded-xl border-2 border-blue-200 dark:border-blue-700 shadow-md">
+                      <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 rounded-xl border-2 border-blue-200 dark:border-blue-700 shadow-md transition-all duration-120 ease-out hover:shadow-md transform-gpu">
                         <p className="text-xs font-medium text-muted-foreground mb-1">Total Amount</p>
                         <p className="text-2xl font-bold text-blue-600">
                           {formatCurrency(taxCalculation.totalAmount)}
@@ -248,7 +248,7 @@ export default function Home() {
                       </div>
                     </div>
 
-                    <div className="text-center p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg">
+                    <div className="text-center p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg transition-opacity duration-150 ease-out">
                       <p className="text-xs text-muted-foreground">
                         Tax rate for <span className="font-medium">{selectedState}</span>: {formatPercentage(taxRate)}
                         {taxRate === 0 && " (No state sales tax)"}
@@ -258,7 +258,7 @@ export default function Home() {
                 )}
 
                 {currentAmount === 0 && (
-                  <div className="text-center p-8 text-muted-foreground bg-slate-50 dark:bg-slate-800 rounded-xl">
+                  <div className="text-center p-8 text-muted-foreground bg-slate-50 dark:bg-slate-800 rounded-xl transition-opacity duration-150 ease-out transform-gpu">
                     <Calculator className="h-12 w-12 mx-auto mb-3 opacity-30" />
                     <h3 className="text-base font-medium mb-1">Ready to Calculate</h3>
                     <p className="text-sm">Enter an amount or select a device to calculate sales tax</p>

@@ -28,17 +28,29 @@ export function useCachedDeviceData() {
           setLastUpdated(cachedData.timestamp);
           setIsLoading(false);
           
-          // Load fresh data in background if cache is old
+          // Load fresh data in background if cache is old (non-blocking)
           const age = Date.now() - cachedData.timestamp;
           if (age > CACHE_DURATION.DEVICE_DATA / 2) {
-            // Recursive call is intentional here for background refresh
-            setTimeout(() => loadDevices(false), 100);
+            // Use requestIdleCallback for background refresh
+            if (typeof requestIdleCallback !== 'undefined') {
+              requestIdleCallback(() => loadDevices(false), { timeout: 5000 });
+            } else {
+              setTimeout(() => loadDevices(false), 2000);
+            }
           }
           return;
         }
       }
 
-      // Load fresh data
+      // Load fresh data with deferred execution
+      await new Promise(resolve => {
+        if (typeof requestIdleCallback !== 'undefined') {
+          requestIdleCallback(resolve, { timeout: 100 });
+        } else {
+          setTimeout(resolve, 16);
+        }
+      });
+      
       await initializeDeviceData();
       const status = getLoadingStatus();
       const popularDevices = getPopularDevices(50);

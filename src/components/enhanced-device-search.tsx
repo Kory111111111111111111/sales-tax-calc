@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useRef, useEffect } from "react"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -43,26 +43,47 @@ function extractBrand(deviceName: string): string {
 export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search devices..." }: EnhancedDeviceSearchProps) {
   const [open, setOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const [debouncedQuery, setDebouncedQuery] = useState("")
+  const debounceRef = useRef<NodeJS.Timeout | null>(null)
   
   const { 
     addToSearchHistory
   } = useSearchHistory()
+  
+  // Debounce search query for better performance
+  useEffect(() => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+    }
+    
+    debounceRef.current = setTimeout(() => {
+      setDebouncedQuery(searchQuery)
+    }, 50) // 50ms debounce for instant visual feedback
+    
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current)
+      }
+    }
+  }, [searchQuery])
 
   const allDevices = getAllDevices()
-  const searchResults = searchQuery ? searchDevices(searchQuery, 80) : allDevices.slice(0, 20)
+  const searchResults = debouncedQuery ? searchDevices(debouncedQuery, 80) : allDevices.slice(0, 20)
   const selectedDevice = value ? getDeviceData(value) : null
 
-  // Filter devices by search query
+  // Filter devices by debounced search query for better performance
   const filteredDevices = useMemo(() => {
-    const devicesToShow = searchQuery ? searchResults : allDevices.slice(0, 20);
-    return devicesToShow.slice(0, searchQuery ? 100 : 20);
-  }, [allDevices, searchResults, searchQuery]);
+    const devicesToShow = debouncedQuery ? searchResults : allDevices.slice(0, 20);
+    return devicesToShow.slice(0, debouncedQuery ? 100 : 20);
+  }, [allDevices, searchResults, debouncedQuery]);
 
   const handleSelect = (deviceName: string) => {
+    // Immediate state update for instant feedback
     onSelect(deviceName);
     if (searchQuery.trim()) {
       addToSearchHistory(searchQuery, deviceName);
     }
+    // Use flushSync for immediate React updates
     setOpen(false);
   };
 
@@ -73,7 +94,7 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between"
+          className="w-full justify-between transition-none transform-gpu will-change-transform touch-action-manipulation select-none active:scale-98 active:transition-none hover:transition-all hover:duration-75"
         >
           {value ? (
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center w-full gap-1 sm:gap-0">
@@ -93,11 +114,11 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-[calc(100vw-2rem)] sm:w-full sm:min-w-[300px] sm:max-w-[400px] lg:max-w-[450px] p-0 z-[100] max-h-[80vh] sm:max-h-[85vh] lg:max-h-[90vh]" 
+        className="w-[calc(100vw-2rem)] sm:w-full sm:min-w-[300px] sm:max-w-[400px] lg:max-w-[450px] p-0 z-[100] max-h-[80vh] sm:max-h-[85vh] lg:max-h-[90vh] transform-gpu" 
         align="start"
         side="bottom"
         avoidCollisions={false}
-        sideOffset={4}
+        sideOffset={2}
       >
         <Command>
           <CommandInput 
@@ -109,7 +130,7 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
           <CommandEmpty>No device found.</CommandEmpty>
           <CommandGroup 
             heading="All Devices" 
-            className="max-h-[min(55vh,400px)] sm:max-h-[min(60vh,450px)] lg:max-h-[min(65vh,500px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800"
+            className="max-h-[min(55vh,400px)] sm:max-h-[min(60vh,450px)] lg:max-h-[min(65vh,500px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800 transform-gpu"
           >
             {filteredDevices.map((deviceName) => {
               const deviceData = getDeviceData(deviceName)
@@ -120,7 +141,7 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
                   key={deviceName}
                   value={deviceName}
                   onSelect={() => handleSelect(deviceName)}
-                  className="cursor-pointer py-1.5 px-2"
+                  className="cursor-pointer py-1.5 px-2 transition-none transform-gpu will-change-transform touch-action-manipulation select-none active:bg-accent/80 active:transition-none hover:bg-accent/60 hover:transition-all hover:duration-50"
                 >
                   <Check
                     className={cn(

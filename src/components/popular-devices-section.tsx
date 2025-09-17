@@ -103,11 +103,11 @@ export function PopularDevicesSection({ selectedDevice, onDeviceSelect }: Popula
   };
 
   return (
-    <Card className="h-fit">
+    <Card className="h-fit animate-scale-in">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Smartphone className="h-4 w-4 text-blue-600" />
+            <Smartphone className="h-4 w-4 text-blue-600 animate-bounce-subtle" />
             <CardTitle className="text-base">Popular Devices</CardTitle>
           </div>
           <Button
@@ -115,13 +115,13 @@ export function PopularDevicesSection({ selectedDevice, onDeviceSelect }: Popula
             size="sm"
             onClick={handleRefreshDevices}
             disabled={isLoadingDevices}
-            className="h-6 w-6 p-0 transition-all duration-200 hover:scale-110 hover:bg-blue-50 dark:hover:bg-blue-950 will-change-transform"
+            className="h-6 w-6 p-0 transition-all duration-200 ease-out hover:scale-110 hover:bg-blue-50 dark:hover:bg-blue-950 transform-gpu"
             title="Refresh device prices"
           >
-            <RefreshCw className={`h-3 w-3 ${isLoadingDevices || isRefreshAnimating ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-3 w-3 transition-transform duration-500 ease-out ${isLoadingDevices || isRefreshAnimating ? 'animate-spin' : ''}`} />
           </Button>
         </div>
-        <CardDescription className="text-xs">
+        <CardDescription className="text-xs animate-fade-in">
           Quick select from popular mobile devices
           {isLoadingDevices && " (Refreshing prices...)"}
         </CardDescription>
@@ -152,10 +152,10 @@ export function PopularDevicesSection({ selectedDevice, onDeviceSelect }: Popula
           popularDevices.map((device) => (
           <div
             key={device.name}
-            className={`p-3 rounded-lg border cursor-pointer transition-all duration-300 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] animate-in fade-in-0 slide-in-from-bottom-2 will-change-transform ${
+            className={`p-3 rounded-lg border cursor-pointer transition-none transform-gpu will-change-transform touch-action-manipulation select-none active:scale-98 active:transition-none hover:transition-all hover:duration-75 ${
               selectedDevice === device.name
-                ? "border-blue-500 bg-blue-50 dark:bg-blue-950 shadow-md"
-                : "border-border hover:border-blue-300"
+                ? "border-blue-500 bg-blue-50 dark:bg-blue-950 shadow-sm"
+                : "border-border hover:border-blue-300 hover:shadow-sm"
             }`}
             onClick={() => onDeviceSelect(device)}
           >
