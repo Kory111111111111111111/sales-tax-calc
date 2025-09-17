@@ -42,12 +42,12 @@ export function DeviceSearch({ value, onSelect, placeholder = "Search devices...
           className="w-full justify-between"
         >
           {value ? (
-            <div className="flex justify-between items-center w-full">
-              <span className="font-medium truncate flex-1 mr-4">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center w-full gap-1 sm:gap-0">
+              <span className="font-medium truncate flex-1 sm:mr-4 text-left">
                 {value}
               </span>
               {selectedDevice && (
-                <span className="text-muted-foreground text-sm flex-shrink-0">
+                <span className="text-muted-foreground text-sm flex-shrink-0 text-left sm:text-right">
                   {formatCurrency(selectedDevice.msrp)}
                 </span>
               )}
@@ -58,7 +58,7 @@ export function DeviceSearch({ value, onSelect, placeholder = "Search devices...
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full min-w-[400px] p-0" align="start">
+      <PopoverContent className="w-[calc(100vw-2rem)] sm:w-full sm:min-w-[400px] sm:max-w-[500px] p-0" align="start">
         <Command>
           <CommandInput 
             placeholder="Search devices..." 
@@ -96,13 +96,13 @@ export function DeviceSearch({ value, onSelect, placeholder = "Search devices...
                       value === deviceName ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  <div className="flex justify-between items-center w-full min-w-0">
-                    <div className="flex flex-col min-w-0 flex-1 mr-4">
-                      <span className="font-medium truncate">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center w-full min-w-0 gap-1 sm:gap-0">
+                    <div className="flex flex-col min-w-0 flex-1 sm:mr-4">
+                      <span className="font-medium truncate text-sm sm:text-base">
                         {deviceName}
                       </span>
                     </div>
-                    <div className="text-right flex-shrink-0">
+                    <div className="text-left sm:text-right flex-shrink-0">
                       <span className="text-sm font-medium">
                         {formatCurrency(deviceData.msrp)}
                       </span>

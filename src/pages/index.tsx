@@ -168,23 +168,23 @@ export default function Home() {
                 </AuroraText>
               </h1>
             </div>
-            <div className="flex justify-center gap-2 flex-wrap">
-              <Badge variant="outline" className="text-xs">50 US States</Badge>
-              <Badge variant="outline" className="text-xs">Real-time Calculation</Badge>
-              <Badge variant="outline" className="text-xs">Device Catalog</Badge>
+            <div className="flex justify-center gap-1 sm:gap-2 flex-wrap px-4">
+              <Badge variant="outline" className="text-xs px-2 py-1">50 US States</Badge>
+              <Badge variant="outline" className="text-xs px-2 py-1">Real-time Calculation</Badge>
+              <Badge variant="outline" className="text-xs px-2 py-1">Device Catalog</Badge>
               {isLoadingDevices && (
-                <Badge variant="secondary" className="text-xs">Loading Devices...</Badge>
+                <Badge variant="secondary" className="text-xs px-2 py-1">Loading Devices...</Badge>
               )}
               {deviceLoadError && (
-                <Badge variant="destructive" className="text-xs">Google Sheets Error</Badge>
+                <Badge variant="destructive" className="text-xs px-2 py-1">Google Sheets Error</Badge>
               )}
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 max-w-7xl mx-auto">
           {/* Popular Devices */}
-          <div className="xl:col-span-1 order-2 xl:order-1">
+          <div className="lg:col-span-1 order-2 lg:order-1">
             <Card className="h-fit">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
@@ -211,18 +211,18 @@ export default function Home() {
                 {popularDevices.map((device) => (
                   <div
                     key={device.name}
-                    className={`p-3 rounded-lg border cursor-pointer transition-all hover:shadow-md hover:scale-[1.02] ${
+                    className={`p-3 rounded-lg border cursor-pointer transition-all hover:shadow-md hover:scale-[1.02] active:scale-[0.98] ${
                       selectedDevice === device.name
                         ? "border-blue-500 bg-blue-50 dark:bg-blue-950 shadow-md"
                         : "border-border hover:border-blue-300"
                     }`}
                     onClick={() => handleDeviceSelect(device)}
                   >
-                    <div className="flex justify-between items-start mb-1">
-                      <h4 className="font-medium text-xs leading-tight">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-1 gap-1 sm:gap-0">
+                      <h4 className="font-medium text-xs leading-tight flex-1">
                         {device.data.displayName || device.name}
                       </h4>
-                      <Badge variant="secondary" className="text-xs font-bold px-1 py-0">
+                      <Badge variant="secondary" className="text-xs font-bold px-2 py-1 self-start sm:self-auto">
                         {formatCurrency(device.data.msrp)}
                       </Badge>
                     </div>
@@ -238,7 +238,7 @@ export default function Home() {
           </div>
 
           {/* Main Calculator */}
-          <div className="xl:col-span-2 order-1 xl:order-2">
+          <div className="lg:col-span-2 order-1 lg:order-2">
             <Card className="shadow-lg">
               <CardHeader className="bg-card dark:bg-card border-b border-border pb-3">
                 <CardTitle className="text-lg">Tax Calculator</CardTitle>
@@ -254,7 +254,7 @@ export default function Home() {
                     Select State
                   </Label>
                   <Select value={selectedState} onValueChange={setSelectedState}>
-                    <SelectTrigger id="state-select" className="h-9">
+                    <SelectTrigger id="state-select" className="h-9 w-full">
                       <SelectValue placeholder="Choose a state" />
                     </SelectTrigger>
                     <SelectContent>
@@ -270,7 +270,7 @@ export default function Home() {
                 {/* Amount Input */}
                 <div className="space-y-1">
                   <Label htmlFor="amount-input" className="text-sm">Amount</Label>
-                  <div className="relative">
+                  <div className="relative w-full">
                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
                       $
                     </span>
@@ -280,7 +280,7 @@ export default function Home() {
                       placeholder="0.00"
                       value={amount}
                       onChange={(e) => handleManualAmountChange(e.target.value)}
-                      className="pl-8 h-9"
+                      className="pl-8 h-9 w-full"
                       step="0.01"
                       min="0"
                     />
@@ -330,7 +330,7 @@ export default function Home() {
                       Tax Calculation
                     </h3>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       <div className="text-center p-4 bg-white dark:bg-slate-900 rounded-xl shadow-sm border">
                         <p className="text-xs font-medium text-muted-foreground mb-1">Original Amount</p>
                         <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">

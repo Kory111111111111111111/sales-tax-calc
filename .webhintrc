@@ -1,0 +1,10 @@
+{
+  "extends": ["web-recommended"],
+  "hints": {
+    "no-inline-styles": "off"
+  },
+  "ignoredUrls": [
+    "**/*.tsx",
+    "**/*.ts"
+  ]
+}
