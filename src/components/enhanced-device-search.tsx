@@ -55,7 +55,7 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
   } = useSearchHistory()
 
   const allDevices = getAllDevices()
-  const searchResults = searchQuery ? searchDevices(searchQuery, 100) : allDevices.slice(0, 50)
+  const searchResults = searchQuery ? searchDevices(searchQuery, 100) : allDevices.slice(0, 30)
   const selectedDevice = value ? getDeviceData(value) : null
 
   // Filter devices by brand (use all devices for brand filtering, then apply search if needed)
@@ -75,7 +75,7 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
     }
     
     // Limit results for performance (but show more when filtering)
-    return devicesToFilter.slice(0, selectedBrand || searchQuery ? 200 : 50);
+    return devicesToFilter.slice(0, selectedBrand || searchQuery ? 150 : 30);
   }, [allDevices, searchResults, searchQuery, selectedBrand]);
 
   // Get available brands from ALL devices, not just search results
@@ -134,7 +134,13 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[calc(100vw-2rem)] sm:w-full sm:min-w-[400px] sm:max-w-[500px] p-0" align="start">
+      <PopoverContent 
+        className="w-[calc(100vw-2rem)] sm:w-full sm:min-w-[400px] sm:max-w-[500px] p-0 z-[100]" 
+        align="start"
+        side="bottom"
+        avoidCollisions={false}
+        sideOffset={8}
+      >
         <Command>
           <CommandInput 
             placeholder="Search devices..." 
@@ -226,7 +232,7 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
           <CommandEmpty>No device found.</CommandEmpty>
           <CommandGroup 
             heading={selectedBrand ? `${selectedBrand} Devices` : "All Devices"} 
-            className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800"
+            className="max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800"
           >
             {filteredDevices.map((deviceName) => {
               const deviceData = getDeviceData(deviceName)

@@ -29,7 +29,7 @@ export function DeviceSearch({ value, onSelect, placeholder = "Search devices...
   const [open, setOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
 
-  const devices = searchDevices(searchQuery, 20)
+  const devices = searchDevices(searchQuery, 15)
   const selectedDevice = value ? getDeviceData(value) : null
 
   return (
@@ -58,7 +58,13 @@ export function DeviceSearch({ value, onSelect, placeholder = "Search devices...
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[calc(100vw-2rem)] sm:w-full sm:min-w-[400px] sm:max-w-[500px] p-0" align="start">
+      <PopoverContent 
+        className="w-[calc(100vw-2rem)] sm:w-full sm:min-w-[400px] sm:max-w-[500px] p-0 z-[100]" 
+        align="start"
+        side="bottom"
+        avoidCollisions={false}
+        sideOffset={8}
+      >
         <Command>
           <CommandInput 
             placeholder="Search devices..." 
@@ -66,7 +72,7 @@ export function DeviceSearch({ value, onSelect, placeholder = "Search devices...
             onValueChange={setSearchQuery}
           />
           <CommandEmpty>No device found.</CommandEmpty>
-          <CommandGroup className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
+          <CommandGroup className="max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
             {devices.map((deviceName) => {
               const deviceData = getDeviceData(deviceName)
               if (!deviceData) {

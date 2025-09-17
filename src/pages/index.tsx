@@ -187,7 +187,7 @@ export default function Home() {
         { count: 100, size: 4, speedMultiplier: 4 },
       ]}
     >
-      <div className="container mx-auto px-4 py-4 relative z-10">
+      <div className="container mx-auto px-4 py-4 relative z-10 min-h-screen overflow-y-auto">
         {/* Header */}
         <div className="flex justify-center items-start mb-4">
           <div className="text-center">
