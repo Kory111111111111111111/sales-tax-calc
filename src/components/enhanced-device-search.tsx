@@ -55,7 +55,7 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
   } = useSearchHistory()
 
   const allDevices = getAllDevices()
-  const searchResults = searchQuery ? searchDevices(searchQuery, 100) : allDevices.slice(0, 30)
+  const searchResults = searchQuery ? searchDevices(searchQuery, 80) : allDevices.slice(0, 20)
   const selectedDevice = value ? getDeviceData(value) : null
 
   // Filter devices by brand (use all devices for brand filtering, then apply search if needed)
@@ -75,7 +75,7 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
     }
     
     // Limit results for performance (but show more when filtering)
-    return devicesToFilter.slice(0, selectedBrand || searchQuery ? 150 : 30);
+    return devicesToFilter.slice(0, selectedBrand || searchQuery ? 100 : 20);
   }, [allDevices, searchResults, searchQuery, selectedBrand]);
 
   // Get available brands from ALL devices, not just search results
@@ -135,7 +135,7 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-[calc(100vw-2rem)] sm:w-full sm:min-w-[400px] sm:max-w-[500px] p-0 z-[100]" 
+        className="w-[calc(100vw-2rem)] sm:w-full sm:min-w-[350px] sm:max-w-[450px] lg:max-w-[500px] p-0 z-[100]" 
         align="start"
         side="bottom"
         avoidCollisions={false}
@@ -232,7 +232,7 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
           <CommandEmpty>No device found.</CommandEmpty>
           <CommandGroup 
             heading={selectedBrand ? `${selectedBrand} Devices` : "All Devices"} 
-            className="max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800"
+            className="max-h-[min(36vh,144px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800"
           >
             {filteredDevices.map((deviceName) => {
               const deviceData = getDeviceData(deviceName)
@@ -253,7 +253,7 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
                   />
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center w-full min-w-0 gap-1 sm:gap-0">
                     <div className="flex flex-col min-w-0 flex-1 sm:mr-4">
-                      <span className="font-medium truncate text-sm sm:text-base">
+                      <span className="font-medium truncate text-xs sm:text-sm">
                         {deviceName}
                       </span>
                       <span className="text-xs text-muted-foreground">
@@ -261,7 +261,7 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
                       </span>
                     </div>
                     <div className="text-left sm:text-right flex-shrink-0">
-                      <span className="text-sm font-medium">
+                      <span className="text-xs sm:text-sm font-medium">
                         {formatCurrency(deviceData.msrp)}
                       </span>
                       {deviceData.prepaid && (

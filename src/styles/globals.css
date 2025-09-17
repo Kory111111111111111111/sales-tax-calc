@@ -231,3 +231,16 @@ html {
     letter-spacing: var(--tracking-normal);
   }
 }
+
+/* Optimizations for lower resolution monitors (1600x900) */
+@media (max-height: 900px) {
+  .popover-content {
+    max-height: min(30vh, 120px) !important;
+  }
+}
+
+@media (max-width: 1600px) and (max-height: 900px) {
+  .popover-content {
+    max-height: min(25vh, 100px) !important;
+  }
+}
