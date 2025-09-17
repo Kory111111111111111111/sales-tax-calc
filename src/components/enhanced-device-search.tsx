@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Check, ChevronsUpDown, Filter, X } from "lucide-react"
+import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -16,7 +16,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Badge } from "@/components/ui/badge"
 import { searchDevices, getDeviceData, getAllDevices } from "@/lib/device-data"
 import { formatCurrency } from "@/lib/tax-data"
 import { useSearchHistory } from "@/hooks/useSearchHistory"
@@ -44,7 +43,6 @@ function extractBrand(deviceName: string): string {
 export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search devices..." }: EnhancedDeviceSearchProps) {
   const [open, setOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedBrand, setSelectedBrand] = useState<string>("")
   
   const { 
     addToSearchHistory
@@ -54,38 +52,11 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
   const searchResults = searchQuery ? searchDevices(searchQuery, 80) : allDevices.slice(0, 20)
   const selectedDevice = value ? getDeviceData(value) : null
 
-  // Filter devices by brand (use all devices for brand filtering, then apply search if needed)
+  // Filter devices by search query
   const filteredDevices = useMemo(() => {
-    let devicesToFilter = searchQuery ? searchResults : allDevices;
-    
-    if (selectedBrand) {
-      devicesToFilter = devicesToFilter.filter(deviceName => extractBrand(deviceName) === selectedBrand);
-    }
-    
-    // If we have a search query, further filter the brand-filtered results
-    if (searchQuery && selectedBrand) {
-      const query = searchQuery.toLowerCase();
-      devicesToFilter = devicesToFilter.filter(deviceName => 
-        deviceName.toLowerCase().includes(query)
-      );
-    }
-    
-    // Limit results for performance (but show more when filtering)
-    return devicesToFilter.slice(0, selectedBrand || searchQuery ? 100 : 20);
-  }, [allDevices, searchResults, searchQuery, selectedBrand]);
-
-  // Get available brands from ALL devices, not just search results
-  const availableBrands = useMemo(() => {
-    const brandCounts = allDevices.reduce((acc, deviceName) => {
-      const brand = extractBrand(deviceName);
-      acc[brand] = (acc[brand] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-
-    return Object.entries(brandCounts)
-      .map(([brand, count]) => ({ brand, count }))
-      .sort((a, b) => b.count - a.count);
-  }, [allDevices]);
+    const devicesToShow = searchQuery ? searchResults : allDevices.slice(0, 20);
+    return devicesToShow.slice(0, searchQuery ? 100 : 20);
+  }, [allDevices, searchResults, searchQuery]);
 
   const handleSelect = (deviceName: string) => {
     onSelect(deviceName);
@@ -122,7 +93,7 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-[calc(100vw-2rem)] sm:w-full sm:min-w-[300px] sm:max-w-[400px] lg:max-w-[450px] p-0 z-[100] max-h-[70vh] sm:max-h-[75vh] lg:max-h-[80vh]" 
+        className="w-[calc(100vw-2rem)] sm:w-full sm:min-w-[300px] sm:max-w-[400px] lg:max-w-[450px] p-0 z-[100] max-h-[80vh] sm:max-h-[85vh] lg:max-h-[90vh]" 
         align="start"
         side="bottom"
         avoidCollisions={false}
@@ -135,42 +106,10 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
             onValueChange={setSearchQuery}
           />
           
-          {/* Brand Filter */}
-          {availableBrands.length > 0 && (
-            <div className="px-2 py-1.5 border-b">
-              <div className="flex items-center gap-1.5 mb-1.5">
-                <Filter className="h-3 w-3" />
-                <span className="text-xs font-medium">Filter by Brand</span>
-                {selectedBrand && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSelectedBrand("")}
-                    className="h-4 w-4 p-0"
-                  >
-                    <X className="h-2.5 w-2.5" />
-                  </Button>
-                )}
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {availableBrands.slice(0, 5).map(({ brand, count }) => (
-                  <Badge
-                    key={brand}
-                    variant={selectedBrand === brand ? "default" : "outline"}
-                    className="cursor-pointer text-xs px-1.5 py-0.5 h-5"
-                    onClick={() => setSelectedBrand(selectedBrand === brand ? "" : brand)}
-                  >
-                    {brand} ({count})
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-
           <CommandEmpty>No device found.</CommandEmpty>
           <CommandGroup 
-            heading={selectedBrand ? `${selectedBrand} Devices` : "All Devices"} 
-            className="max-h-[min(35vh,180px)] sm:max-h-[min(40vh,200px)] lg:max-h-[min(45vh,220px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800"
+            heading="All Devices" 
+            className="max-h-[min(55vh,400px)] sm:max-h-[min(60vh,450px)] lg:max-h-[min(65vh,500px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800"
           >
             {filteredDevices.map((deviceName) => {
               const deviceData = getDeviceData(deviceName)
