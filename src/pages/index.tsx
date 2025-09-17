@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calculator, Smartphone, MapPin, Search, RefreshCw } from "lucide-react";
+import { Calculator, Smartphone, MapPin, Search, RefreshCw, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,8 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { AuroraText } from "@/components/ui/aurora-text";
-import { DeviceSearch } from "@/components/device-search";
+import { EnhancedDeviceSearch } from "@/components/enhanced-device-search";
 import { CustomStarsBackground } from "@/components/custom-stars-background";
+import { DeviceSkeletonList } from "@/components/device-skeleton";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
+import { toast } from "sonner";
 import { 
   getAllStates, 
   getTaxRate, 
@@ -27,7 +30,9 @@ import {
 } from "@/lib/device-data";
 
 export default function Home() {
-  const [selectedState, setSelectedState] = useState<string>("Maine");
+  const { preferences, updatePreference } = useUserPreferences();
+  
+  const [selectedState, setSelectedState] = useState<string>(preferences.preferredState || "Maine");
   const [amount, setAmount] = useState<string>("");
   const [selectedDevice, setSelectedDevice] = useState<string>("");
   const [useDevicePrice, setUseDevicePrice] = useState<boolean>(false);
@@ -35,6 +40,13 @@ export default function Home() {
   const [popularDevices, setPopularDevices] = useState<Device[]>([]);
   const [isLoadingDevices, setIsLoadingDevices] = useState<boolean>(true);
   const [deviceLoadError, setDeviceLoadError] = useState<string>("");
+  const [isRefreshAnimating, setIsRefreshAnimating] = useState<boolean>(false);
+
+  // Update state selection and save to preferences
+  const handleStateChange = (newState: string) => {
+    setSelectedState(newState);
+    updatePreference('preferredState', newState);
+  };
 
   const states = getAllStates();
   const taxRate = getTaxRate(selectedState);
@@ -56,11 +68,21 @@ export default function Home() {
         
         if (status.deviceCount === 0) {
           setDeviceLoadError("No devices loaded from Google Sheets");
+          toast.error("Failed to load device data from Google Sheets");
+        } else {
+          toast.success(`Loaded ${status.deviceCount} devices successfully`);
         }
         
       } catch (error) {
         console.error('❌ Error loading device data:', error);
         setDeviceLoadError("Failed to load device data");
+        toast.error("Failed to load device data", {
+          description: "Please check your internet connection and try again",
+          action: {
+            label: "Retry",
+            onClick: () => loadDevices(),
+          },
+        });
         // Still try to load popular devices with whatever we have
         setPopularDevices(getPopularDevices(4));
       } finally {
@@ -74,8 +96,14 @@ export default function Home() {
   // Refresh device data function
   const handleRefreshDevices = async () => {
     try {
+      // Trigger animation
+      setIsRefreshAnimating(true);
+      setTimeout(() => setIsRefreshAnimating(false), 2000); // Stop animation after 2 seconds
+      
       setIsLoadingDevices(true);
       setDeviceLoadError("");
+      
+      toast.loading("Refreshing device data...", { id: "refresh-devices" });
       
       await refreshDeviceData();
       setPopularDevices(getPopularDevices(4));
@@ -83,9 +111,21 @@ export default function Home() {
       const status = getLoadingStatus();
       console.log(`Refreshed ${status.deviceCount} devices`);
       
+      if (status.deviceCount > 0) {
+        toast.success(`Successfully refreshed ${status.deviceCount} devices with latest prices`, { 
+          id: "refresh-devices" 
+        });
+      } else {
+        toast.error("No devices found after refresh", { id: "refresh-devices" });
+        setDeviceLoadError("Failed to refresh device data");
+      }
+      
     } catch (error) {
       console.error('Error refreshing device data:', error);
       setDeviceLoadError("Failed to refresh device data");
+      toast.error("Failed to refresh device data. Please try again.", { 
+        id: "refresh-devices" 
+      });
     } finally {
       setIsLoadingDevices(false);
     }
@@ -168,17 +208,6 @@ export default function Home() {
                 </AuroraText>
               </h1>
             </div>
-            <div className="flex justify-center gap-1 sm:gap-2 flex-wrap px-4">
-              <Badge variant="outline" className="text-xs px-2 py-1">50 US States</Badge>
-              <Badge variant="outline" className="text-xs px-2 py-1">Real-time Calculation</Badge>
-              <Badge variant="outline" className="text-xs px-2 py-1">Device Catalog</Badge>
-              {isLoadingDevices && (
-                <Badge variant="secondary" className="text-xs px-2 py-1">Loading Devices...</Badge>
-              )}
-              {deviceLoadError && (
-                <Badge variant="destructive" className="text-xs px-2 py-1">Google Sheets Error</Badge>
-              )}
-            </div>
           </div>
         </div>
 
@@ -197,21 +226,44 @@ export default function Home() {
                     size="sm"
                     onClick={handleRefreshDevices}
                     disabled={isLoadingDevices}
-                    className="h-6 w-6 p-0"
+                    className="h-6 w-6 p-0 transition-all duration-200 hover:scale-110 hover:bg-blue-50 dark:hover:bg-blue-950"
+                    title="Refresh device prices"
                   >
-                    <RefreshCw className={`h-3 w-3 ${isLoadingDevices ? 'animate-spin' : ''}`} />
+                    <RefreshCw className={`h-3 w-3 ${isLoadingDevices || isRefreshAnimating ? 'animate-spin' : ''}`} />
                   </Button>
                 </div>
                 <CardDescription className="text-xs">
                   Quick select from popular mobile devices
-                  {isLoadingDevices && " (Loading...)"}
+                  {isLoadingDevices && " (Refreshing prices...)"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2 pt-0">
-                {popularDevices.map((device) => (
+                {isLoadingDevices ? (
+                  <DeviceSkeletonList count={4} />
+                ) : deviceLoadError ? (
+                  <div className="text-center py-6 text-muted-foreground">
+                    <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm mb-3">{deviceLoadError}</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleRefreshDevices}
+                      disabled={isLoadingDevices}
+                    >
+                      <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingDevices ? 'animate-spin' : ''}`} />
+                      Retry
+                    </Button>
+                  </div>
+                ) : popularDevices.length === 0 ? (
+                  <div className="text-center py-6 text-muted-foreground">
+                    <Smartphone className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No devices available</p>
+                  </div>
+                ) : (
+                  popularDevices.map((device) => (
                   <div
                     key={device.name}
-                    className={`p-3 rounded-lg border cursor-pointer transition-all hover:shadow-md hover:scale-[1.02] active:scale-[0.98] ${
+                    className={`p-3 rounded-lg border cursor-pointer transition-all duration-300 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] animate-in fade-in-0 slide-in-from-bottom-2 ${
                       selectedDevice === device.name
                         ? "border-blue-500 bg-blue-50 dark:bg-blue-950 shadow-md"
                         : "border-border hover:border-blue-300"
@@ -232,7 +284,8 @@ export default function Home() {
                       </p>
                     )}
                   </div>
-                ))}
+                  ))
+                )}
               </CardContent>
             </Card>
           </div>
@@ -253,7 +306,7 @@ export default function Home() {
                     <MapPin className="h-3 w-3" />
                     Select State
                   </Label>
-                  <Select value={selectedState} onValueChange={setSelectedState}>
+                  <Select value={selectedState} onValueChange={handleStateChange}>
                     <SelectTrigger id="state-select" className="h-9 w-full">
                       <SelectValue placeholder="Choose a state" />
                     </SelectTrigger>
@@ -308,7 +361,7 @@ export default function Home() {
                     <Search className="h-3 w-3" />
                     Search All Devices
                   </Label>
-                  <DeviceSearch
+                  <EnhancedDeviceSearch
                     value={selectedDevice}
                     onSelect={(deviceName) => {
                       const deviceData = getDeviceData(deviceName);
