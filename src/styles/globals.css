@@ -232,15 +232,92 @@ html {
   }
 }
 
-/* Optimizations for lower resolution monitors (1600x900) */
+/* Performance optimizations for smooth interactions */
+* {
+  /* Enable hardware acceleration for transforms and opacity */
+  will-change: auto;
+}
+
+.transition-all {
+  /* Force GPU acceleration for smooth transitions */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+button, .cursor-pointer {
+  /* Optimize interactive elements */
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Optimizations for lower resolution monitors (1600x900 and similar) */
 @media (max-height: 900px) {
   .popover-content {
-    max-height: min(30vh, 120px) !important;
+    max-height: min(35vh, 140px) !important;
+  }
+  
+  /* Make command groups show 3-4 devices */
+  [data-slot="command-group"] {
+    max-height: min(30vh, 140px) !important;
+  }
+  
+  /* Reduce padding in command items */
+  [data-slot="command-item"] {
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+  }
+  
+  /* Make brand filter section more compact */
+  .brand-filter {
+    padding: 0.375rem !important;
   }
 }
 
 @media (max-width: 1600px) and (max-height: 900px) {
   .popover-content {
+    max-height: min(32vh, 130px) !important;
+  }
+  
+  /* Show 3 devices comfortably on 1600x900 */
+  [data-slot="command-group"] {
+    max-height: min(28vh, 120px) !important;
+  }
+  
+  /* Make text smaller on low resolution */
+  .command-item-text {
+    font-size: 0.75rem !important;
+  }
+}
+
+/* Ultra compact mode for very low resolutions */
+@media (max-height: 800px) {
+  .popover-content {
+    max-height: min(30vh, 110px) !important;
+  }
+  
+  [data-slot="command-group"] {
     max-height: min(25vh, 100px) !important;
+  }
+}
+
+/* Larger screens get more space */
+@media (min-height: 1080px) {
+  .popover-content {
+    max-height: min(50vh, 300px) !important;
+  }
+  
+  [data-slot="command-group"] {
+    max-height: min(45vh, 280px) !important;
   }
 }

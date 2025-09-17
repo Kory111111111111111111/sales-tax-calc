@@ -22,6 +22,46 @@ let lastFetchTime: number = 0;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 /**
+ * Process data in chunks to avoid blocking the main thread
+ */
+function processInChunks<T, R>(
+  items: T[],
+  processor: (item: T) => R | null,
+  chunkSize: number = 50
+): Promise<R[]> {
+  return new Promise((resolve) => {
+    const results: R[] = [];
+    let index = 0;
+    
+    function processChunk() {
+      const chunk = items.slice(index, index + chunkSize);
+      
+      for (const item of chunk) {
+        const result = processor(item);
+        if (result !== null) {
+          results.push(result);
+        }
+      }
+      
+      index += chunkSize;
+      
+      if (index < items.length) {
+        // Use larger timeout to reduce interference with UI
+        if (typeof requestIdleCallback !== 'undefined') {
+          requestIdleCallback(processChunk, { timeout: 100 });
+        } else {
+          setTimeout(processChunk, 16); // ~60fps
+        }
+      } else {
+        resolve(results);
+      }
+    }
+    
+    processChunk();
+  });
+}
+
+/**
  * Parse CSV line with proper handling of quoted fields containing commas
  */
 function parseCSVLine(line: string): string[] {
@@ -199,9 +239,9 @@ function parsePrice(priceStr: string | number): number {
 }
 
 /**
- * Process raw CSV data into device data structure
+ * Process raw CSV data into device data structure (optimized)
  */
-function processDeviceData(rawData: RawDeviceRow[]): Record<string, DeviceData> {
+async function processDeviceData(rawData: RawDeviceRow[]): Promise<Record<string, DeviceData>> {
   if (rawData.length === 0) return {};
   
   const headers = Object.keys(rawData[0]);
@@ -220,44 +260,27 @@ function processDeviceData(rawData: RawDeviceRow[]): Record<string, DeviceData> 
     return {};
   }
   
-  const devices: Record<string, DeviceData> = {};
-  let processedCount = 0;
-  let skippedCount = 0;
+  console.log(`🔄 Processing ${rawData.length} rows of device data in chunks...`);
   
-  console.log(`🔄 Processing ${rawData.length} rows of device data...`);
-  
-  for (const row of rawData) {
+  // Process data in chunks to avoid blocking the main thread
+  const deviceEntries = await processInChunks(rawData, (row: RawDeviceRow) => {
     try {
       const phoneName = String(row[phoneCol] || '').trim();
       const msrpValue = row[msrpCol];
       
       if (!phoneName || phoneName.toLowerCase() === 'nan' || phoneName.length < 2) {
-        skippedCount++;
-        continue;
+        return null;
       }
       
       const msrp = parsePrice(msrpValue);
       if (msrp <= 0) {
-        console.log(`⚠️ Skipping ${phoneName}: invalid MSRP (${msrpValue})`);
-        skippedCount++;
-        continue;
+        return null;
       }
       
-      // Debug: Log suspicious prices and their raw data
+      // Skip devices with suspicious prices
       if (msrp <= 2) {
-        console.log(`🚨 SUSPICIOUS PRICE DETECTED:`);
-        console.log(`   Device: ${phoneName}`);
-        console.log(`   Raw MSRP Value: "${msrpValue}"`);
-        console.log(`   Parsed MSRP: $${msrp}`);
-        console.log(`   Full row data:`, row);
-        console.log(`   MSRP Column: "${msrpCol}"`);
-        
-        // Let's see ALL column values for this row
-        console.log(`   All row values:`, Object.keys(row).map(key => `${key}: "${row[key]}"`));
-        
-        // Skip devices with suspicious prices to avoid polluting the data
-        skippedCount++;
-        continue;
+        console.log(`🚨 Skipping suspicious price: ${phoneName} - $${msrp}`);
+        return null;
       }
       
       const deviceData: DeviceData = { msrp };
@@ -270,22 +293,19 @@ function processDeviceData(rawData: RawDeviceRow[]): Record<string, DeviceData> 
         }
       }
       
-      // Generate display name (shorter version for UI)
+      // Generate display name
       deviceData.displayName = generateDisplayName(phoneName);
       
-      devices[phoneName] = deviceData;
-      processedCount++;
-      
-      // Log first few devices for debugging
-      if (processedCount <= 3) {
-        console.log(`📱 Device ${processedCount}: ${phoneName} - $${msrp}${deviceData.prepaid ? ` (Prepaid: $${deviceData.prepaid})` : ''}`);
-      }
+      return [phoneName, deviceData] as [string, DeviceData];
       
     } catch {
-      skippedCount++;
-      continue;
+      return null;
     }
-  }
+  }, 75); // Larger chunks for better performance
+  
+  const devices = Object.fromEntries(deviceEntries);
+  const processedCount = Object.keys(devices).length;
+  const skippedCount = rawData.length - processedCount;
   
   console.log(`✅ Processing complete: ${processedCount} devices processed, ${skippedCount} skipped`);
   return devices;
@@ -368,7 +388,7 @@ export async function fetchDevicesFromGoogleSheets(): Promise<Record<string, Dev
     console.log('🔍 Parsed rows:', rawData.length);
     console.log('🔍 Sample row:', rawData[0]);
     
-    const devices = processDeviceData(rawData);
+    const devices = await processDeviceData(rawData);
     console.log('✅ Processed devices:', Object.keys(devices).length);
     console.log('📱 Sample devices:', Object.keys(devices).slice(0, 5));
     

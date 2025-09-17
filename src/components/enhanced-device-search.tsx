@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Check, ChevronsUpDown, Filter, Clock, X } from "lucide-react"
+import { Check, ChevronsUpDown, Filter, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -17,7 +17,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { searchDevices, getDeviceData, getAllDevices } from "@/lib/device-data"
 import { formatCurrency } from "@/lib/tax-data"
 import { useSearchHistory } from "@/hooks/useSearchHistory"
@@ -48,10 +47,7 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
   const [selectedBrand, setSelectedBrand] = useState<string>("")
   
   const { 
-    addToSearchHistory, 
-    getRecentSearches, 
-    getSuggestions,
-    removeFromSearchHistory 
+    addToSearchHistory
   } = useSearchHistory()
 
   const allDevices = getAllDevices()
@@ -91,21 +87,12 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
       .sort((a, b) => b.count - a.count);
   }, [allDevices]);
 
-  // Get recent searches and suggestions
-  const recentSearches = getRecentSearches(3);
-  const suggestions = getSuggestions(searchQuery, 3);
-
   const handleSelect = (deviceName: string) => {
     onSelect(deviceName);
     if (searchQuery.trim()) {
       addToSearchHistory(searchQuery, deviceName);
     }
     setOpen(false);
-  };
-
-  const handleSuggestionSelect = (suggestion: { query: string; deviceName: string }) => {
-    setSearchQuery(suggestion.query);
-    handleSelect(suggestion.deviceName);
   };
 
   return (
@@ -135,11 +122,11 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-[calc(100vw-2rem)] sm:w-full sm:min-w-[350px] sm:max-w-[450px] lg:max-w-[500px] p-0 z-[100]" 
+        className="w-[calc(100vw-2rem)] sm:w-full sm:min-w-[300px] sm:max-w-[400px] lg:max-w-[450px] p-0 z-[100] max-h-[70vh] sm:max-h-[75vh] lg:max-h-[80vh]" 
         align="start"
         side="bottom"
         avoidCollisions={false}
-        sideOffset={8}
+        sideOffset={4}
       >
         <Command>
           <CommandInput 
@@ -150,8 +137,8 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
           
           {/* Brand Filter */}
           {availableBrands.length > 0 && (
-            <div className="px-3 py-2 border-b">
-              <div className="flex items-center gap-2 mb-2">
+            <div className="px-2 py-1.5 border-b">
+              <div className="flex items-center gap-1.5 mb-1.5">
                 <Filter className="h-3 w-3" />
                 <span className="text-xs font-medium">Filter by Brand</span>
                 {selectedBrand && (
@@ -159,18 +146,18 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
                     variant="ghost"
                     size="sm"
                     onClick={() => setSelectedBrand("")}
-                    className="h-5 w-5 p-0"
+                    className="h-4 w-4 p-0"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-2.5 w-2.5" />
                   </Button>
                 )}
               </div>
               <div className="flex flex-wrap gap-1">
-                {availableBrands.slice(0, 6).map(({ brand, count }) => (
+                {availableBrands.slice(0, 5).map(({ brand, count }) => (
                   <Badge
                     key={brand}
                     variant={selectedBrand === brand ? "default" : "outline"}
-                    className="cursor-pointer text-xs px-2 py-1"
+                    className="cursor-pointer text-xs px-1.5 py-0.5 h-5"
                     onClick={() => setSelectedBrand(selectedBrand === brand ? "" : brand)}
                   >
                     {brand} ({count})
@@ -180,59 +167,10 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
             </div>
           )}
 
-          {/* Recent Searches and Suggestions */}
-          {!searchQuery && recentSearches.length > 0 && (
-            <CommandGroup heading="Recent Searches">
-              {recentSearches.map((item, index) => (
-                <CommandItem
-                  key={`recent-${index}`}
-                  onSelect={() => handleSuggestionSelect(item)}
-                  className="cursor-pointer"
-                >
-                  <Clock className="mr-2 h-4 w-4 opacity-50" />
-                  <div className="flex flex-col">
-                    <span className="font-medium">{item.deviceName}</span>
-                    <span className="text-xs text-muted-foreground">&ldquo;{item.query}&rdquo;</span>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeFromSearchHistory(index);
-                    }}
-                    className="ml-auto h-4 w-4 p-0 opacity-50 hover:opacity-100"
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          )}
-
-          {searchQuery && suggestions.length > 0 && (
-            <CommandGroup heading="Suggestions">
-              {suggestions.map((item, index) => (
-                <CommandItem
-                  key={`suggestion-${index}`}
-                  onSelect={() => handleSuggestionSelect(item)}
-                  className="cursor-pointer"
-                >
-                  <Clock className="mr-2 h-4 w-4 opacity-50" />
-                  <span className="font-medium">{item.deviceName}</span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          )}
-
-          {(recentSearches.length > 0 || suggestions.length > 0) && filteredDevices.length > 0 && (
-            <Separator />
-          )}
-
           <CommandEmpty>No device found.</CommandEmpty>
           <CommandGroup 
             heading={selectedBrand ? `${selectedBrand} Devices` : "All Devices"} 
-            className="max-h-[min(36vh,144px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800"
+            className="max-h-[min(35vh,180px)] sm:max-h-[min(40vh,200px)] lg:max-h-[min(45vh,220px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800"
           >
             {filteredDevices.map((deviceName) => {
               const deviceData = getDeviceData(deviceName)
@@ -243,17 +181,17 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
                   key={deviceName}
                   value={deviceName}
                   onSelect={() => handleSelect(deviceName)}
-                  className="cursor-pointer"
+                  className="cursor-pointer py-1.5 px-2"
                 >
                   <Check
                     className={cn(
-                      "mr-2 h-4 w-4",
+                      "mr-1.5 h-3 w-3",
                       value === deviceName ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center w-full min-w-0 gap-1 sm:gap-0">
-                    <div className="flex flex-col min-w-0 flex-1 sm:mr-4">
-                      <span className="font-medium truncate text-xs sm:text-sm">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center w-full min-w-0 gap-0.5 sm:gap-0">
+                    <div className="flex flex-col min-w-0 flex-1 sm:mr-3">
+                      <span className="font-medium truncate text-xs">
                         {deviceName}
                       </span>
                       <span className="text-xs text-muted-foreground">
@@ -261,7 +199,7 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
                       </span>
                     </div>
                     <div className="text-left sm:text-right flex-shrink-0">
-                      <span className="text-xs sm:text-sm font-medium">
+                      <span className="text-xs font-medium">
                         {formatCurrency(deviceData.msrp)}
                       </span>
                       {deviceData.prepaid && (
