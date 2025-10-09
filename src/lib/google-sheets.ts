@@ -25,60 +25,23 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 /**
  * Process data in chunks to avoid blocking the main thread
- * Ultra-optimized for smooth animations and UI responsiveness
  */
 function processInChunks<T, R>(
   items: T[],
   processor: (item: T) => R | null,
-  chunkSize: number = 15 // Smaller chunks for ultra-smooth performance
+  chunkSize: number = 50
 ): Promise<R[]> {
   return new Promise((resolve) => {
     const results: R[] = [];
-    let index = 0;
-    
-    function processChunk() {
-      const startTime = performance.now();
-      const chunk = items.slice(index, index + chunkSize);
-      
-      // Process chunk with stricter time budget (max 4ms to maintain 120fps)
-      let processed = 0;
-      for (const item of chunk) {
-        const result = processor(item);
-        if (result !== null) {
-          results.push(result);
-        }
-        
-        processed++;
-        // Break early if we're taking too long
-        if (performance.now() - startTime > 4) {
-          index += processed;
-          break;
-        }
-      }
-      
-      if (processed === chunk.length) {
-        index += chunkSize;
-      }
-      
-      if (index < items.length) {
-        // Use even shorter timeout for ultra-responsiveness
-        if (typeof requestIdleCallback !== 'undefined') {
-          requestIdleCallback(processChunk, { timeout: 16 });
-        } else {
-          // Use 4ms timeout for ~240fps scheduling
-          setTimeout(processChunk, 4);
-        }
-      } else {
-        resolve(results);
-      }
+
+    // Process synchronously in reasonable chunks
+    for (let i = 0; i < items.length; i += chunkSize) {
+      const chunk = items.slice(i, i + chunkSize);
+      const chunkResults = chunk.map(processor).filter(result => result !== null);
+      results.push(...chunkResults);
     }
-    
-    // Start with immediate scheduling for fastest response
-    if (typeof requestIdleCallback !== 'undefined') {
-      requestIdleCallback(processChunk, { timeout: 16 });
-    } else {
-      processChunk();
-    }
+
+    resolve(results as R[]);
   });
 }
 
@@ -291,7 +254,7 @@ async function processDeviceData(rawData: RawDeviceRow[]): Promise<Record<string
     } catch {
       return null;
     }
-  }, 75); // Larger chunks for better performance
+  }, 25); // Smaller chunks for better responsiveness
   
   const devices = Object.fromEntries(deviceEntries);
   return devices;
