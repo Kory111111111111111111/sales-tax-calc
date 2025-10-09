@@ -188,20 +188,9 @@ export function searchDevices(query: string, limit: number = 50): string[] {
   const queryLower = query.toLowerCase();
   const devices = getAllDevices();
   
-  const results = devices
+  return devices
     .filter(device => device.toLowerCase().includes(queryLower))
     .slice(0, limit);
-  
-  // Debug: Log search results and their prices
-  if (queryLower.includes('iphone')) {
-    logger.deviceData(`🔍 iPhone search for "${query}" found ${results.length} results:`);
-    results.slice(0, 5).forEach((deviceName, index) => {
-      const deviceData = getDeviceData(deviceName);
-      logger.deviceData(`  ${index + 1}. ${deviceName}: $${deviceData?.msrp || 'N/A'}`);
-    });
-  }
-  
-  return results;
 }
 
 /**
@@ -211,17 +200,6 @@ export function searchDevices(query: string, limit: number = 50): string[] {
  * @returns Array of popular devices with display data
  */
 export function getPopularDevices(limit: number = 4): Device[] {
-  // Debug: Let's see what iPhone devices are actually available
-  const allDevices = getAllDevices();
-  const iPhones = allDevices.filter(device => device.toLowerCase().includes('iphone'));
-  logger.deviceData(`🔍 Found ${iPhones.length} iPhones in data:`, iPhones.slice(0, 10));
-  
-  // Log prices for the first few iPhones
-  iPhones.slice(0, 5).forEach(iphone => {
-    const data = getDeviceData(iphone);
-    logger.deviceData(`📱 ${iphone}: $${data?.msrp || 'N/A'}`);
-  });
-
   const preferredDevices = [
     "Apple iPhone 17 - Lavender 256GB",
     "Samsung Galaxy S25 Silver Shadow 128GB", 
@@ -237,13 +215,10 @@ export function getPopularDevices(limit: number = 4): Device[] {
     
     const deviceData = getDeviceData(deviceName);
     if (deviceData) {
-      logger.deviceData(`✅ Found preferred device: ${deviceName} - $${deviceData.msrp}`);
       popularDevices.push({
         name: deviceName,
         data: deviceData
       });
-    } else {
-      logger.deviceData(`❌ Preferred device not found: ${deviceName}`);
     }
   }
   
