@@ -176,7 +176,7 @@ export default function Home() {
                       <SelectTrigger id="state-select" className="h-9 w-full">
                         <SelectValue placeholder="Choose a state" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent position="popper" side="bottom" align="start" avoidCollisions={false}>
                         {states.map((state) => (
                           <SelectItem key={state} value={state}>
                             {state} ({formatPercentage(getTaxRate(state))})
