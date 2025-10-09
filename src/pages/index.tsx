@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Calculator, MapPin, Search } from "lucide-react";
+import { Calculator, MapPin, Search, X } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +30,7 @@ export default function Home() {
   const [selectedDevice, setSelectedDevice] = useState<string>("");
   const [useDevicePrice, setUseDevicePrice] = useState<boolean>(false);
   const [usePrepaidPrice, setUsePrepaidPrice] = useState<boolean>(false);
+  const [showWarningBanner, setShowWarningBanner] = useState<boolean>(true);
 
   // Update state selection and save to preferences
   const handleStateChange = (newState: string) => {
@@ -97,6 +98,22 @@ export default function Home() {
       ]}
     >
       <div className="container mx-auto px-4 py-4 relative z-10 min-h-screen overflow-y-auto">
+        {/* Warning Banner */}
+        {showWarningBanner && (
+          <div className="mb-4 bg-red-600 text-white px-4 py-3 rounded-lg border-2 border-red-700 shadow-lg relative">
+            <button
+              onClick={() => setShowWarningBanner(false)}
+              className="absolute top-2 right-2 p-1 hover:bg-red-700 rounded transition-colors"
+              aria-label="Close warning banner"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <p className="text-center font-semibold text-sm sm:text-base leading-tight pr-8">
+              ⚠️ STOP. BEFORE USING THIS TOOL VERIFY YOU ARE WORKING WITH A USCELLULAR CUSTOMER AND NOT A T-MOBILE CUSTOMER. ANY INCORRECT INFORMATION GIVEN IF YOU DO NOT FOLLOW THESE INSTRUCTIONS WILL BE YOUR SOLE RESPONSIBILITY TO FIX.
+            </p>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex justify-center items-start mb-4">
           <div className="text-center">
