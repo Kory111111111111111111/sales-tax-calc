@@ -135,6 +135,7 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
           variant="outline"
           role="combobox"
           aria-expanded={open}
+          aria-label={value ? `Selected device: ${value}` : "Search and select device"}
           className="w-full justify-between transition-none touch-action-manipulation select-none active:scale-98 active:transition-none hover:transition-all hover:duration-75"
         >
           {value ? (

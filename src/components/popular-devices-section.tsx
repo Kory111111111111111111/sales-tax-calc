@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Smartphone, RefreshCw, AlertCircle } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DeviceSkeletonList } from "@/components/device-skeleton";
@@ -109,7 +109,7 @@ export function PopularDevicesSection({ selectedDevice, onDeviceSelect }: Popula
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Smartphone className="h-4 w-4 text-blue-600 animate-bounce-subtle" />
-            <CardTitle className="text-base">Popular Devices</CardTitle>
+            <h3 className="text-base font-semibold leading-none">Popular Devices</h3>
           </div>
           <Button
             variant="ghost"
@@ -161,9 +161,9 @@ export function PopularDevicesSection({ selectedDevice, onDeviceSelect }: Popula
             onClick={() => onDeviceSelect(device)}
           >
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-1 gap-1 sm:gap-0">
-              <h4 className="font-medium text-xs leading-tight flex-1">
+              <span className="font-medium text-xs leading-tight flex-1">
                 {device.data.displayName || device.name}
-              </h4>
+              </span>
               <Badge variant="secondary" className="text-xs font-bold px-2 py-1 self-start sm:self-auto">
                 {formatCurrency(device.data.msrp)}
               </Badge>

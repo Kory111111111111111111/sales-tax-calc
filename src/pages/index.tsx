@@ -1,6 +1,7 @@
 import { useState } from "react";
+import Head from "next/head";
 import { Calculator, MapPin, Search, X } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -82,7 +83,15 @@ export default function Home() {
   };
 
   return (
-    <LazyCustomStarsBackgroundWithSuspense 
+    <>
+      <Head>
+        <title>Sales Tax Calculator - Calculate US State Sales Tax</title>
+        <meta name="description" content="Free sales tax calculator for US states. Calculate sales tax on mobile devices and manual amounts. Supports all 50 states with accurate tax rates." />
+        <meta name="keywords" content="sales tax calculator, US tax calculator, state sales tax, mobile device tax, tax calculation tool" />
+        <meta name="author" content="Sales Tax Calculator" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
+      <LazyCustomStarsBackgroundWithSuspense 
       className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800"
       starColor="rgba(147, 197, 253, 0.6)"
       speed={60}
@@ -150,7 +159,7 @@ export default function Home() {
           <div className="lg:col-span-2 order-1 lg:order-2">
             <Card className="shadow-lg animate-scale-in">
               <CardHeader className="bg-card dark:bg-card border-b border-border pb-3">
-                <CardTitle className="text-lg">Tax Calculator</CardTitle>
+                <h2 className="text-lg font-semibold leading-none">Tax Calculator</h2>
                 <CardDescription className="text-sm">
                   Enter an amount or select a device to calculate sales tax
                 </CardDescription>
@@ -287,5 +296,6 @@ export default function Home() {
         </div>
       </div>
     </LazyCustomStarsBackgroundWithSuspense>
+    </>
   );
 }
