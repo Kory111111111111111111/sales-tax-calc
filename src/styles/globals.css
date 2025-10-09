@@ -306,10 +306,7 @@ html {
 
 /* Enhanced transition defaults for ultra-smooth animations */
 .transition-all {
-  /* Force GPU acceleration for smooth transitions */
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  perspective: 1000px;
+  /* Smooth transitions without GPU forcing that causes blur */
   transition-duration: 150ms;
   transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   transition-delay: 0ms;
@@ -317,9 +314,7 @@ html {
 
 /* Immediate visual feedback for interactive elements */
 button, .cursor-pointer, [role="combobox"], [role="option"] {
-  /* Optimize interactive elements for immediate response */
-  will-change: transform, opacity, background-color, border-color;
-  transform: translateZ(0);
+  /* Optimize interactive elements for immediate response without blur */
   transition: all 0ms;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
@@ -333,7 +328,7 @@ button:hover, .cursor-pointer:hover {
 
 /* Instant active states for immediate feedback */
 button:active, .cursor-pointer:active, [role="combobox"]:active {
-  transform: translateZ(0) scale(0.98) !important;
+  transform: scale(0.98) !important;
   transition: all 0ms !important;
   opacity: 0.9;
 }
@@ -344,31 +339,24 @@ button:active, .cursor-pointer:active, [role="combobox"]:active {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Enhanced popover and dropdown animations */
-[data-radix-popper-content-wrapper] {
-  will-change: transform, opacity;
-  transform: translateZ(0);
-}
-
 /* Smooth hover states */
 button:hover, .cursor-pointer:hover {
-  transform: translateZ(0) scale(1.02);
+  transform: scale(1.02);
   transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 button:active, .cursor-pointer:active {
-  transform: translateZ(0) scale(0.98);
+  transform: scale(0.98);
   transition: all 100ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Enhanced command item animations */
 [data-slot="command-item"] {
   transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  transform: translateZ(0);
 }
 
 [data-slot="command-item"]:hover {
-  transform: translateZ(0) translateX(2px);
+  transform: translateX(2px);
 }
 
 /* Smooth content area transitions */
@@ -401,28 +389,26 @@ button:active, .cursor-pointer:active {
 [role="option"]:active,
 button:active,
 .cursor-pointer:active {
-  transform: scale(0.97) translateZ(0) !important;
+  transform: scale(0.98) !important;
   filter: brightness(0.95) !important;
   transition: none !important;
 }
 
-/* Remove any potential delays */
+/* Optimize text rendering for clarity */
 * {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeSpeed;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+  text-rendering: optimizeLegibility;
 }
 
 /* Enhanced focus states with smooth transitions */
 input:focus, select:focus, [role="combobox"]:focus {
   transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  transform: translateZ(0);
 }
 
 /* Card animations */
 .shadow-lg, .shadow-md, .shadow-sm {
   transition: box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1), transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  transform: translateZ(0);
 }
 
 /* Reduce motion for users who prefer it */

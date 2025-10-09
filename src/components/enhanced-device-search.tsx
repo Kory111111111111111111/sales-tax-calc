@@ -94,7 +94,7 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between transition-none transform-gpu will-change-transform touch-action-manipulation select-none active:scale-98 active:transition-none hover:transition-all hover:duration-75"
+          className="w-full justify-between transition-none touch-action-manipulation select-none active:scale-98 active:transition-none hover:transition-all hover:duration-75"
         >
           {value ? (
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center w-full gap-1 sm:gap-0">
