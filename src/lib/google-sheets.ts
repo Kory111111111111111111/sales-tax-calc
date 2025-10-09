@@ -1,6 +1,8 @@
 // Google Sheets integration for loading device data
 // Based on the Python implementation that loads from Google Sheets
 
+import { logger, logError, logWarn } from './logger';
+
 export interface DeviceData {
   msrp: number;
   prepaid?: number;
@@ -129,7 +131,7 @@ function parseCSV(csvText: string): RawDeviceRow[] {
   const lines = csvText.split('\n').filter(line => line.trim());
   if (lines.length === 0) return [];
   
-  console.log(`📋 Total CSV lines: ${lines.length}`);
+  logger.googleSheets(`📋 Total CSV lines: ${lines.length}`);
   
   // Find the actual data header row (look for a row that has "Phone" or device-like content)
   let headerRowIndex = -1;
@@ -140,7 +142,7 @@ function parseCSV(csvText: string): RawDeviceRow[] {
     const line = lines[i].toLowerCase();
     if (line.includes('phone') || line.includes('device') || line.includes('sap')) {
       headerRowIndex = i;
-      console.log(`📍 Found header row at line ${i + 1}: ${lines[i].substring(0, 100)}`);
+      logger.googleSheets(`📍 Found header row at line ${i + 1}: ${lines[i].substring(0, 100)}`);
       break;
     }
   }
@@ -148,17 +150,17 @@ function parseCSV(csvText: string): RawDeviceRow[] {
   // If we found a header row, use it. Otherwise, use row 4 (index 3) as fallback
   if (headerRowIndex === -1) {
     headerRowIndex = 3; // Row 4 (0-indexed)
-    console.log(`📍 Using fallback header row at line ${headerRowIndex + 1}`);
+    logger.googleSheets(`📍 Using fallback header row at line ${headerRowIndex + 1}`);
   }
   
   // Data starts on the row after the header
   dataStartRow = headerRowIndex + 1;
   
-  console.log(`📍 Header row: ${headerRowIndex + 1}, Data starts: ${dataStartRow + 1}`);
-  console.log(`📄 Header line: ${lines[headerRowIndex]?.substring(0, 200)}`);
+  logger.googleSheets(`📍 Header row: ${headerRowIndex + 1}, Data starts: ${dataStartRow + 1}`);
+  logger.googleSheets(`📄 Header line: ${lines[headerRowIndex]?.substring(0, 200)}`);
   
   const headers = parseCSVLine(lines[headerRowIndex] || '').map(h => h.replace(/"/g, ''));
-  console.log(`📊 Parsed headers (${headers.length}):`, headers.slice(0, 10));
+  logger.googleSheets(`📊 Parsed headers (${headers.length}):`, headers.slice(0, 10));
   
   const rows: RawDeviceRow[] = [];
   
@@ -173,8 +175,8 @@ function parseCSV(csvText: string): RawDeviceRow[] {
     }
   }
   
-  console.log(`📋 Parsed ${rows.length} data rows`);
-  console.log(`📄 Sample data row:`, rows[0]);
+  logger.googleSheets(`📋 Parsed ${rows.length} data rows`);
+  logger.googleSheets(`📄 Sample data row:`, rows[0]);
   
   return rows;
 }
@@ -188,7 +190,7 @@ function detectColumns(headers: string[]): {
   msrpCol: string | null;
   prepaidCol: string | null;
 } {
-  console.log(`🔍 Column detection for ${headers.length} headers:`, headers);
+  logger.googleSheets(`🔍 Column detection for ${headers.length} headers:`, headers);
   
   let phoneCol: string | null = null;
   let msrpCol: string | null = null;
@@ -197,23 +199,23 @@ function detectColumns(headers: string[]): {
   // Based on user feedback: Column B (index 1) = phones, Column E (index 4) = prices
   if (headers.length > 1) {
     phoneCol = headers[1]; // Column B (0-indexed as 1)
-    console.log(`📱 Using Column B for phones: "${phoneCol}"`);
+    logger.googleSheets(`📱 Using Column B for phones: "${phoneCol}"`);
   }
 
   if (headers.length > 4) {
     msrpCol = headers[4]; // Column E (0-indexed as 4)
-    console.log(`💰 Using Column E for prices: "${msrpCol}"`);
+    logger.googleSheets(`💰 Using Column E for prices: "${msrpCol}"`);
   }
 
   // Try to find prepaid column (look for Column I or any prepaid-related column)
   if (headers.length > 8) {
     prepaidCol = headers[8]; // Column I (0-indexed as 8)
-    console.log(`💳 Using Column I for prepaid: "${prepaidCol}"`);
+    logger.googleSheets(`💳 Using Column I for prepaid: "${prepaidCol}"`);
   }
 
   // Fallback: search by column name if position-based detection fails
   if (!phoneCol || !msrpCol) {
-    console.log('🔄 Position-based detection failed, trying name-based detection...');
+    logger.googleSheets('🔄 Position-based detection failed, trying name-based detection...');
     
     for (let i = 0; i < headers.length; i++) {
       const header = headers[i];
@@ -222,19 +224,19 @@ function detectColumns(headers: string[]): {
       // Look for phone column
       if (!phoneCol && (headerLower.includes('phone') || headerLower.includes('device') || headerLower.includes('equipment'))) {
         phoneCol = header;
-        console.log(`📱 Found phone column by name: "${header}" at index ${i}`);
+        logger.googleSheets(`📱 Found phone column by name: "${header}" at index ${i}`);
       }
       
       // Look for MSRP/price column
       if (!msrpCol && (headerLower.includes('purchase') || headerLower.includes('payment') || headerLower.includes('price') || headerLower.includes('msrp'))) {
         msrpCol = header;
-        console.log(`💰 Found price column by name: "${header}" at index ${i}`);
+        logger.googleSheets(`💰 Found price column by name: "${header}" at index ${i}`);
       }
       
       // Look for prepaid column
       if (!prepaidCol && (headerLower.includes('prepaid') || headerLower.includes('suggested'))) {
         prepaidCol = header;
-        console.log(`💳 Found prepaid column by name: "${header}" at index ${i}`);
+        logger.googleSheets(`💳 Found prepaid column by name: "${header}" at index ${i}`);
       }
     }
   }
@@ -266,20 +268,20 @@ async function processDeviceData(rawData: RawDeviceRow[]): Promise<Record<string
   const headers = Object.keys(rawData[0]);
   const { phoneCol, msrpCol, prepaidCol } = detectColumns(headers);
   
-  console.log('🔍 Column detection results:');
-  console.log('  📱 Phone column:', phoneCol);
-  console.log('  💰 MSRP column:', msrpCol);
-  console.log('  💳 Prepaid column:', prepaidCol);
-  console.log('  📊 Available headers:', headers);
+  logger.googleSheets('🔍 Column detection results:');
+  logger.googleSheets('  📱 Phone column:', phoneCol);
+  logger.googleSheets('  💰 MSRP column:', msrpCol);
+  logger.googleSheets('  💳 Prepaid column:', prepaidCol);
+  logger.googleSheets('  📊 Available headers:', headers);
   
   if (!phoneCol || !msrpCol) {
-    console.error('❌ Could not detect required columns for device data');
-    console.error('  📱 Phone column found:', !!phoneCol);
-    console.error('  💰 MSRP column found:', !!msrpCol);
+    logError('❌ Could not detect required columns for device data');
+    logError('  📱 Phone column found:', !!phoneCol);
+    logError('  💰 MSRP column found:', !!msrpCol);
     return {};
   }
   
-  console.log(`🔄 Processing ${rawData.length} rows of device data in chunks...`);
+  logger.googleSheets(`🔄 Processing ${rawData.length} rows of device data in chunks...`);
   
   // Process data in chunks to avoid blocking the main thread
   const deviceEntries = await processInChunks(rawData, (row: RawDeviceRow) => {
@@ -298,7 +300,7 @@ async function processDeviceData(rawData: RawDeviceRow[]): Promise<Record<string
       
       // Skip devices with suspicious prices
       if (msrp <= 2) {
-        console.log(`🚨 Skipping suspicious price: ${phoneName} - $${msrp}`);
+        logger.googleSheets(`🚨 Skipping suspicious price: ${phoneName} - $${msrp}`);
         return null;
       }
       
@@ -326,7 +328,7 @@ async function processDeviceData(rawData: RawDeviceRow[]): Promise<Record<string
   const processedCount = Object.keys(devices).length;
   const skippedCount = rawData.length - processedCount;
   
-  console.log(`✅ Processing complete: ${processedCount} devices processed, ${skippedCount} skipped`);
+  logger.googleSheets(`✅ Processing complete: ${processedCount} devices processed, ${skippedCount} skipped`);
   return devices;
 }
 
@@ -373,13 +375,13 @@ export async function fetchDevicesFromGoogleSheets(): Promise<Record<string, Dev
   // Check cache first
   const now = Date.now();
   if (deviceCache && (now - lastFetchTime) < CACHE_DURATION) {
-    console.log('📦 Using cached device data');
+    logger.googleSheets('📦 Using cached device data');
     return deviceCache;
   }
   
   try {
-    console.log('🔄 Fetching device data from Google Sheets...');
-    console.log('📍 URL:', GOOGLE_SHEETS_CSV_URL);
+    logger.googleSheets('🔄 Fetching device data from Google Sheets...');
+    logger.googleSheets('📍 URL:', GOOGLE_SHEETS_CSV_URL);
     
     const response = await fetch(GOOGLE_SHEETS_CSV_URL, {
       method: 'GET',
@@ -388,38 +390,38 @@ export async function fetchDevicesFromGoogleSheets(): Promise<Record<string, Dev
       },
     });
     
-    console.log('📡 Response status:', response.status, response.statusText);
-    console.log('📋 Response headers:', Object.fromEntries(response.headers.entries()));
+    logger.googleSheets('📡 Response status:', response.status, response.statusText);
+    logger.googleSheets('📋 Response headers:', Object.fromEntries(response.headers.entries()));
     
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
     
     const csvText = await response.text();
-    console.log('📄 CSV length:', csvText.length);
-    console.log('📄 First 500 characters of CSV:', csvText.substring(0, 500));
+    logger.googleSheets('📄 CSV length:', csvText.length);
+    logger.googleSheets('📄 First 500 characters of CSV:', csvText.substring(0, 500));
     
     if (!csvText || csvText.trim().length === 0) {
       throw new Error('Empty CSV response');
     }
     
     const rawData = parseCSV(csvText);
-    console.log('🔍 Parsed rows:', rawData.length);
-    console.log('🔍 Sample row:', rawData[0]);
+    logger.googleSheets('🔍 Parsed rows:', rawData.length);
+    logger.googleSheets('🔍 Sample row:', rawData[0]);
     
     const devices = await processDeviceData(rawData);
-    console.log('✅ Processed devices:', Object.keys(devices).length);
-    console.log('📱 Sample devices:', Object.keys(devices).slice(0, 5));
+    logger.googleSheets('✅ Processed devices:', Object.keys(devices).length);
+    logger.googleSheets('📱 Sample devices:', Object.keys(devices).slice(0, 5));
     
     // Update cache
     deviceCache = devices;
     lastFetchTime = now;
     
-    console.log(`🎉 Successfully loaded ${Object.keys(devices).length} devices from Google Sheets`);
+    logger.googleSheets(`🎉 Successfully loaded ${Object.keys(devices).length} devices from Google Sheets`);
     return devices;
     
   } catch (error) {
-    console.error('Error fetching device data from Google Sheets:', error);
+    logError('Error fetching device data from Google Sheets:', error);
     
     // Provide more specific error messages
     let errorMessage = 'Unknown error occurred';
@@ -435,7 +437,7 @@ export async function fetchDevicesFromGoogleSheets(): Promise<Record<string, Dev
       }
     }
     
-    console.warn(`Google Sheets error: ${errorMessage}. Using fallback device data.`);
+    logWarn(`Google Sheets error: ${errorMessage}. Using fallback device data.`);
     
     // Return cache if available, otherwise empty object
     return deviceCache || {};

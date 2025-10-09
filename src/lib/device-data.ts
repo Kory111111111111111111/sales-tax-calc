@@ -12,11 +12,16 @@ export interface Device {
 
 // Import Google Sheets integration
 import { fetchDevicesFromGoogleSheets, getCachedDevices } from './google-sheets';
+import { logger, logError, logWarn, logInfo } from './logger';
+import { getNetworkStatus, retryWithBackoff } from './network';
 
 // Local state for devices
 let currentDevices: Record<string, DeviceData> = {};
 let isLoading = false;
 let hasLoaded = false;
+let lastError: string | null = null;
+let retryCount = 0;
+const MAX_RETRIES = 3;
 
 // No fallback data - force Google Sheets loading only
 
@@ -31,44 +36,89 @@ export async function initializeDeviceData(): Promise<Record<string, DeviceData>
     }
     return currentDevices;
   }
-  
-  if (hasLoaded) {
+
+  if (hasLoaded && Object.keys(currentDevices).length > 0) {
     return currentDevices;
   }
-  
+
   isLoading = true;
-  
+  lastError = null;
+
   try {
+    // Check network status first
+    const networkStatus = getNetworkStatus();
+    logInfo(`Network status: ${networkStatus.isOnline ? 'online' : 'offline'}`);
+
+    if (!networkStatus.isOnline) {
+      logWarn('Device offline, attempting to use cached data');
+      const cached = getCachedDevices();
+      if (cached && Object.keys(cached).length > 0) {
+        currentDevices = cached;
+        hasLoaded = true;
+        lastError = 'Using cached data - you appear to be offline';
+        isLoading = false;
+        return currentDevices;
+      } else {
+        throw new Error('No internet connection and no cached data available');
+      }
+    }
+
     // Try to get cached data first
     const cached = getCachedDevices();
-    if (cached && Object.keys(cached).length > 0) {
+    if (cached && Object.keys(cached).length > 0 && retryCount === 0) {
       currentDevices = cached;
       hasLoaded = true;
       isLoading = false;
       return currentDevices;
     }
-    
-    // Fetch from Google Sheets
-    const devices = await fetchDevicesFromGoogleSheets();
-    
+
+    // Fetch from Google Sheets with retry logic
+    const devices = await retryWithBackoff(
+      async () => {
+        const result = await fetchDevicesFromGoogleSheets();
+        if (Object.keys(result).length === 0) {
+          throw new Error('No devices loaded from Google Sheets');
+        }
+        return result;
+      },
+      MAX_RETRIES,
+      1000
+    );
+
     if (Object.keys(devices).length > 0) {
       currentDevices = devices;
-      console.log(`✅ Successfully loaded ${Object.keys(devices).length} devices from Google Sheets`);
+      retryCount = 0; // Reset retry count on success
+      logger.deviceData(`✅ Successfully loaded ${Object.keys(devices).length} devices from Google Sheets`);
     } else {
-      console.error('❌ Failed to load any devices from Google Sheets');
-      currentDevices = {};
+      throw new Error('Failed to load any devices from Google Sheets');
     }
-    
+
     hasLoaded = true;
     return currentDevices;
-    
+
   } catch (error) {
-    console.error('❌ Critical error initializing device data:', error);
-    // No fallback - return empty to force Google Sheets debugging
-    currentDevices = {};
-    hasLoaded = true;
+    retryCount++;
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    lastError = errorMessage;
+
+    logError('❌ Critical error initializing device data:', error);
+
+    // Try to use cached data as fallback
+    const cached = getCachedDevices();
+    if (cached && Object.keys(cached).length > 0) {
+      logWarn('Using cached device data as fallback');
+      currentDevices = cached;
+      hasLoaded = true;
+      lastError = `${errorMessage}. Using cached data.`;
+    } else {
+      // No fallback available
+      currentDevices = {};
+      hasLoaded = true;
+      lastError = `${errorMessage}. No cached data available.`;
+    }
+
     return currentDevices;
-    
+
   } finally {
     isLoading = false;
   }
@@ -144,10 +194,10 @@ export function searchDevices(query: string, limit: number = 50): string[] {
   
   // Debug: Log search results and their prices
   if (queryLower.includes('iphone')) {
-    console.log(`🔍 iPhone search for "${query}" found ${results.length} results:`);
+    logger.deviceData(`🔍 iPhone search for "${query}" found ${results.length} results:`);
     results.slice(0, 5).forEach((deviceName, index) => {
       const deviceData = getDeviceData(deviceName);
-      console.log(`  ${index + 1}. ${deviceName}: $${deviceData?.msrp || 'N/A'}`);
+      logger.deviceData(`  ${index + 1}. ${deviceName}: $${deviceData?.msrp || 'N/A'}`);
     });
   }
   
@@ -164,12 +214,12 @@ export function getPopularDevices(limit: number = 4): Device[] {
   // Debug: Let's see what iPhone devices are actually available
   const allDevices = getAllDevices();
   const iPhones = allDevices.filter(device => device.toLowerCase().includes('iphone'));
-  console.log(`🔍 Found ${iPhones.length} iPhones in data:`, iPhones.slice(0, 10));
+  logger.deviceData(`🔍 Found ${iPhones.length} iPhones in data:`, iPhones.slice(0, 10));
   
   // Log prices for the first few iPhones
   iPhones.slice(0, 5).forEach(iphone => {
     const data = getDeviceData(iphone);
-    console.log(`📱 ${iphone}: $${data?.msrp || 'N/A'}`);
+    logger.deviceData(`📱 ${iphone}: $${data?.msrp || 'N/A'}`);
   });
 
   const preferredDevices = [
@@ -187,13 +237,13 @@ export function getPopularDevices(limit: number = 4): Device[] {
     
     const deviceData = getDeviceData(deviceName);
     if (deviceData) {
-      console.log(`✅ Found preferred device: ${deviceName} - $${deviceData.msrp}`);
+      logger.deviceData(`✅ Found preferred device: ${deviceName} - $${deviceData.msrp}`);
       popularDevices.push({
         name: deviceName,
         data: deviceData
       });
     } else {
-      console.log(`❌ Preferred device not found: ${deviceName}`);
+      logger.deviceData(`❌ Preferred device not found: ${deviceName}`);
     }
   }
   
@@ -220,10 +270,28 @@ export function getPopularDevices(limit: number = 4): Device[] {
 /**
  * Get loading status
  */
-export function getLoadingStatus(): { isLoading: boolean; hasLoaded: boolean; deviceCount: number } {
+export function getLoadingStatus(): { isLoading: boolean; hasLoaded: boolean; deviceCount: number; lastError: string | null; retryCount: number } {
   return {
     isLoading,
     hasLoaded,
-    deviceCount: Object.keys(currentDevices).length
+    deviceCount: Object.keys(currentDevices).length,
+    lastError,
+    retryCount
   };
+}
+
+/**
+ * Get the last error message
+ */
+export function getLastError(): string | null {
+  return lastError;
+}
+
+/**
+ * Clear error state and retry loading
+ */
+export async function retryLoading(): Promise<Record<string, DeviceData>> {
+  hasLoaded = false;
+  lastError = null;
+  return await initializeDeviceData();
 }

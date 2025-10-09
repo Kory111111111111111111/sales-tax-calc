@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/popover"
 import { searchDevices, getDeviceData } from "@/lib/device-data"
 import { formatCurrency } from "@/lib/tax-data"
+import { logWarn, logInfo } from "@/lib/logger"
 
 interface DeviceSearchProps {
   value?: string
@@ -76,14 +77,14 @@ export function DeviceSearch({ value, onSelect, placeholder = "Search devices...
             {devices.map((deviceName) => {
               const deviceData = getDeviceData(deviceName)
               if (!deviceData) {
-                console.log(`❌ No device data found for: ${deviceName}`);
+                logWarn(`No device data found for: ${deviceName}`);
                 return null;
               }
               
               // Debug: Log devices with suspicious prices
               if (deviceData.msrp <= 2) {
-                console.log(`🚨 Suspicious price for ${deviceName}: $${deviceData.msrp}`);
-                console.log(`   Raw device data:`, deviceData);
+                logWarn(`Suspicious price for ${deviceName}: $${deviceData.msrp}`);
+                logInfo(`Raw device data:`, deviceData);
               }
               
               return (

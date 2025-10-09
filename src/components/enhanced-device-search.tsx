@@ -16,9 +16,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { searchDevices, getDeviceData, getAllDevices } from "@/lib/device-data"
+import { searchDevices, getDeviceData, getAllDevices, initializeDeviceData, getLoadingStatus, retryLoading } from "@/lib/device-data"
 import { formatCurrency } from "@/lib/tax-data"
 import { useSearchHistory } from "@/hooks/useSearchHistory"
+import { ErrorState } from "@/components/error-state"
 
 interface EnhancedDeviceSearchProps {
   value?: string
@@ -44,12 +45,31 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
   const [open, setOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [debouncedQuery, setDebouncedQuery] = useState("")
+  const [error, setError] = useState<string | null>(null)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
   
   const { 
     addToSearchHistory
   } = useSearchHistory()
   
+  // Initialize device data on mount
+  useEffect(() => {
+    const initData = async () => {
+      try {
+        setError(null);
+        await initializeDeviceData();
+        const status = getLoadingStatus();
+        if (status.lastError) {
+          setError(status.lastError);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load device data');
+      }
+    };
+
+    initData();
+  }, []);
+
   // Debounce search query for better performance
   useEffect(() => {
     if (debounceRef.current) {
@@ -65,7 +85,7 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
         clearTimeout(debounceRef.current)
       }
     }
-  }, [searchQuery])
+  }, [searchQuery]);
 
   const allDevices = getAllDevices()
   const searchResults = debouncedQuery ? searchDevices(debouncedQuery, 80) : allDevices.slice(0, 20)
@@ -86,6 +106,27 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
     // Use flushSync for immediate React updates
     setOpen(false);
   };
+
+  // Show error state if device data failed to load
+  if (error) {
+    return (
+      <ErrorState
+        error={error}
+        onRetry={async () => {
+          try {
+            setError(null);
+            await retryLoading();
+            const status = getLoadingStatus();
+            if (status.lastError) {
+              setError(status.lastError);
+            }
+          } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to retry loading device data');
+          }
+        }}
+      />
+    );
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

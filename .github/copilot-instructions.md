@@ -100,3 +100,4 @@ Use custom hooks for stateful logic:
 - Use React DevTools for component state inspection
 - Monitor network tab for Google Sheets CSV loading performance
 - Check console for device processing logs and cache hit/miss information
+- You DO NOT HAVE THE ABILITY TO SEE SALES DATA.

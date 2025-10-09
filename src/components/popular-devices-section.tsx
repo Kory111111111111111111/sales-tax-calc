@@ -13,6 +13,7 @@ import {
   type Device 
 } from "@/lib/device-data";
 import { formatCurrency } from "@/lib/tax-data";
+import { logInfo, logError } from "@/lib/logger";
 
 interface PopularDevicesSectionProps {
   selectedDevice: string;
@@ -32,14 +33,14 @@ export function PopularDevicesSection({ selectedDevice, onDeviceSelect }: Popula
         setIsLoadingDevices(true);
         setDeviceLoadError("");
         
-        console.log('🔄 Starting device data initialization...');
+        logInfo('Starting device data initialization...');
         
         // Use setTimeout to defer this heavy operation
         await new Promise(resolve => setTimeout(resolve, 100));
         await initializeDeviceData();
         
         const status = getLoadingStatus();
-        console.log(`📊 Final status: ${status.deviceCount} devices loaded`);
+        logInfo(`Final status: ${status.deviceCount} devices loaded`);
         
         setPopularDevices(getPopularDevices(4));
         
@@ -50,7 +51,7 @@ export function PopularDevicesSection({ selectedDevice, onDeviceSelect }: Popula
         }
         
       } catch (error) {
-        console.error('❌ Error loading device data:', error);
+        logError('Error loading device data:', error);
         setDeviceLoadError("Failed to load device data");
         // Still try to load popular devices with whatever we have
         setPopularDevices(getPopularDevices(4));
@@ -80,7 +81,7 @@ export function PopularDevicesSection({ selectedDevice, onDeviceSelect }: Popula
       setPopularDevices(getPopularDevices(4));
       
       const status = getLoadingStatus();
-      console.log(`Refreshed ${status.deviceCount} devices`);
+      logInfo(`Refreshed ${status.deviceCount} devices`);
       
       if (status.deviceCount > 0) {
         toast.success(`Successfully refreshed ${status.deviceCount} devices with latest prices`, { 
@@ -92,7 +93,7 @@ export function PopularDevicesSection({ selectedDevice, onDeviceSelect }: Popula
       }
       
     } catch (error) {
-      console.error('Error refreshing device data:', error);
+      logError('Error refreshing device data:', error);
       setDeviceLoadError("Failed to refresh device data");
       toast.error("Failed to refresh device data. Please try again.", { 
         id: "refresh-devices" 

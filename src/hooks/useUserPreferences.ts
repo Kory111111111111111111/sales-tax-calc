@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { LocalStorageCache, CACHE_KEYS, CACHE_DURATION } from '@/lib/cache';
+import { logError } from '@/lib/logger';
 import { UserPreferences } from '@/types/features';
 
 const defaultPreferences: UserPreferences = {
@@ -24,7 +25,7 @@ export function useUserPreferences() {
           setPreferences({ ...defaultPreferences, ...savedPreferences });
         }
       } catch (error) {
-        console.error('Failed to load user preferences:', error);
+        logError('Failed to load user preferences:', error);
       } finally {
         setIsLoading(false);
       }

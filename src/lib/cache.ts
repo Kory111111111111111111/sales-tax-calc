@@ -1,4 +1,5 @@
 // Local storage utilities for caching and persistence
+import { logWarn } from './logger'
 
 export interface CacheItem<T> {
   data: T;
@@ -20,7 +21,7 @@ export class LocalStorageCache {
       };
       localStorage.setItem(key, JSON.stringify(item));
     } catch (error) {
-      console.warn('Failed to save to localStorage:', error);
+      logWarn('Failed to save to localStorage:', error);
     }
   }
 
@@ -41,7 +42,7 @@ export class LocalStorageCache {
 
       return cached.data;
     } catch (error) {
-      console.warn('Failed to read from localStorage:', error);
+      logWarn('Failed to read from localStorage:', error);
       return null;
     }
   }
@@ -52,7 +53,7 @@ export class LocalStorageCache {
     try {
       localStorage.removeItem(key);
     } catch (error) {
-      console.warn('Failed to remove from localStorage:', error);
+      logWarn('Failed to remove from localStorage:', error);
     }
   }
 
@@ -62,7 +63,7 @@ export class LocalStorageCache {
     try {
       localStorage.clear();
     } catch (error) {
-      console.warn('Failed to clear localStorage:', error);
+      logWarn('Failed to clear localStorage:', error);
     }
   }
 

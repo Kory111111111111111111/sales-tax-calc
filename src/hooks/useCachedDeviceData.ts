@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { LocalStorageCache, CACHE_KEYS, CACHE_DURATION } from '@/lib/cache';
+import { logError } from '@/lib/logger';
 import { getLoadingStatus, initializeDeviceData, getPopularDevices } from '@/lib/device-data';
 import { type Device } from '@/lib/device-data';
 
@@ -70,7 +71,7 @@ export function useCachedDeviceData() {
         setLastUpdated(Date.now());
       }
     } catch (err) {
-      console.error('Failed to load device data:', err);
+      logError('Failed to load device data:', err);
       setError('Failed to load device data');
     } finally {
       setIsLoading(false);

@@ -23,6 +23,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "critters": "^0.0.23",
+    "debug": "^4.4.3",
     "headless": "^1.2.0",
     "lucide-react": "^0.544.0",
     "motion": "^12.23.13",
@@ -38,6 +39,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/debug": "^4.1.12",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

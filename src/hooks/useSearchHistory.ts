@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { LocalStorageCache, CACHE_KEYS, CACHE_DURATION } from '@/lib/cache';
+import { logError } from '@/lib/logger';
 import { SearchHistoryItem } from '@/types/features';
 
 export function useSearchHistory() {
@@ -14,7 +15,7 @@ export function useSearchHistory() {
         const savedHistory = LocalStorageCache.get<SearchHistoryItem[]>(CACHE_KEYS.SEARCH_HISTORY) || [];
         setSearchHistory(savedHistory);
       } catch (error) {
-        console.error('Failed to load search history:', error);
+        logError('Failed to load search history:', error);
       }
     };
 

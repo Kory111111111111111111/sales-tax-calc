@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { LocalStorageCache, CACHE_KEYS, CACHE_DURATION } from '@/lib/cache';
+import { logError } from '@/lib/logger';
 import { CalculationHistoryItem } from '@/types/features';
 import { toast } from 'sonner';
 
@@ -16,7 +17,7 @@ export function useCalculationHistory() {
         const savedHistory = LocalStorageCache.get<CalculationHistoryItem[]>(CACHE_KEYS.CALCULATION_HISTORY) || [];
         setHistory(savedHistory);
       } catch (error) {
-        console.error('Failed to load calculation history:', error);
+        logError('Failed to load calculation history:', error);
         toast.error('Failed to load calculation history');
       } finally {
         setIsLoading(false);
@@ -81,7 +82,7 @@ export function useCalculationHistory() {
 
       toast.success('Calculation history exported');
     } catch (error) {
-      console.error('Failed to export history:', error);
+      logError('Failed to export history:', error);
       toast.error('Failed to export calculation history');
     }
   }, [history]);
