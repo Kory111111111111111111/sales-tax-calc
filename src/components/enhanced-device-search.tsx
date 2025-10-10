@@ -136,7 +136,7 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
           role="combobox"
           aria-expanded={open}
           aria-label={value ? `Selected device: ${value}` : "Search and select device"}
-          className="w-full justify-between transition-none touch-action-manipulation select-none active:scale-98 active:transition-none hover:transition-all hover:duration-75"
+          className="w-full justify-between"
         >
           {value ? (
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center w-full gap-1 sm:gap-0">
@@ -183,7 +183,7 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
                   key={deviceName}
                   value={deviceName}
                   onSelect={() => handleSelect(deviceName)}
-                  className="cursor-pointer py-1.5 px-2 transition-none transform-gpu will-change-transform touch-action-manipulation select-none active:bg-accent/80 active:transition-none hover:bg-accent/60 hover:transition-all hover:duration-50"
+                  className="cursor-pointer py-1.5 px-2"
                 >
                   <Check
                     className={cn(

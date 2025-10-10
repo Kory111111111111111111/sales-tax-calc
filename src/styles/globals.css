@@ -312,42 +312,10 @@ html {
   transition-delay: 0ms;
 }
 
-/* Immediate visual feedback for interactive elements */
-button, .cursor-pointer, [role="combobox"], [role="option"] {
-  /* Optimize interactive elements for immediate response without blur */
-  transition: all 0ms;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-}
-
-/* Immediate hover states */
-button:hover, .cursor-pointer:hover {
-  transition: all 50ms ease-out;
-}
-
-/* Instant active states for immediate feedback */
-button:active, .cursor-pointer:active, [role="combobox"]:active {
-  transform: scale(0.98) !important;
-  transition: all 0ms !important;
-  opacity: 0.9;
-}
-
-/* Remove touch delays */
+/* Base touch optimization for all elements */
 * {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-}
-
-/* Smooth hover states */
-button:hover, .cursor-pointer:hover {
-  transform: scale(1.02);
-  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-button:active, .cursor-pointer:active {
-  transform: scale(0.98);
-  transition: all 100ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Enhanced command item animations */
@@ -383,15 +351,13 @@ button:active, .cursor-pointer:active {
   pointer-events: auto;
 }
 
-/* Immediate active state feedback */
-[role="button"]:active,
+/* Active state feedback for non-button interactive elements */
 [role="combobox"]:active,
 [role="option"]:active,
-button:active,
 .cursor-pointer:active {
-  transform: scale(0.98) !important;
-  filter: brightness(0.95) !important;
-  transition: none !important;
+  transform: scale(0.98);
+  filter: brightness(0.95);
+  transition: all 100ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Optimize text rendering for clarity */
@@ -401,22 +367,165 @@ button:active,
   text-rendering: optimizeLegibility;
 }
 
+/* Enhanced Animation Framework for Dropdowns */
+:root {
+  --dropdown-duration: 220ms;
+  --dropdown-easing-in: cubic-bezier(0.16, 1, 0.3, 1);
+  --dropdown-easing-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --micro-duration: 150ms;
+  --micro-easing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced dropdown animations */
+.dropdown-animate-in {
+  animation: dropdown-in var(--dropdown-duration) var(--dropdown-easing-in) forwards;
+}
+
+.dropdown-animate-out {
+  animation: dropdown-out var(--dropdown-duration) var(--dropdown-easing-out) forwards;
+}
+
+@keyframes dropdown-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes dropdown-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+}
+
+/* Directional slide animations */
+@keyframes slide-in-from-top {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes slide-in-from-bottom {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes slide-in-from-left {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateX(0);
+  }
+}
+
+@keyframes slide-in-from-right {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateX(0);
+  }
+}
+
+/* Micro-interactions for list items */
+.list-item-hover {
+  transition: all var(--micro-duration) var(--micro-easing);
+}
+
+.list-item-hover:hover {
+  transform: translateX(2px);
+  background-color: hsl(var(--accent) / 0.6);
+}
+
+.list-item-active {
+  transform: scale(0.98) !important;
+  transition: transform 100ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Staggered animations for command items */
+.command-item-stagger {
+  animation: fade-in-up var(--dropdown-duration) var(--dropdown-easing-in) both;
+}
+
+.command-item-stagger:nth-child(1) { animation-delay: 0ms; }
+.command-item-stagger:nth-child(2) { animation-delay: 20ms; }
+.command-item-stagger:nth-child(3) { animation-delay: 40ms; }
+.command-item-stagger:nth-child(4) { animation-delay: 60ms; }
+.command-item-stagger:nth-child(5) { animation-delay: 80ms; }
+.command-item-stagger:nth-child(n+6) { animation-delay: 100ms; }
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Enhanced focus states with smooth transitions */
 input:focus, select:focus, [role="combobox"]:focus {
-  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--dropdown-duration) var(--dropdown-easing-in);
 }
 
 /* Card animations */
 .shadow-lg, .shadow-md, .shadow-sm {
-  transition: box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1), transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: box-shadow var(--dropdown-duration) var(--dropdown-easing-in), transform var(--micro-duration) var(--micro-easing);
 }
 
-/* Reduce motion for users who prefer it */
+/* Improved reduced motion handling */
 @media (prefers-reduced-motion: reduce) {
+  :root {
+    --dropdown-duration: 100ms;
+    --micro-duration: 50ms;
+  }
+  
+  .dropdown-animate-in,
+  .dropdown-animate-out,
+  .command-item-stagger {
+    animation: fade-only var(--dropdown-duration) ease-out both !important;
+  }
+  
+  .list-item-hover:hover {
+    transform: none !important;
+  }
+  
+  @keyframes fade-only {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
   *, *::before, *::after {
-    animation-duration: 0.01ms !important;
+    animation-duration: var(--dropdown-duration) !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transition-duration: var(--micro-duration) !important;
     scroll-behavior: auto !important;
   }
 }
