@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import Head from "next/head";
-import { Calculator, MapPin, Search, X } from "lucide-react";
+import { Calculator, X } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -33,17 +32,18 @@ export default function Home() {
   const [usePrepaidPrice, setUsePrepaidPrice] = useState<boolean>(false);
   const [showWarningBanner, setShowWarningBanner] = useState<boolean>(true);
 
+  // Memoize expensive calculations
+  const states = useMemo(() => getAllStates(), []);
+  const taxRate = useMemo(() => getTaxRate(selectedState), [selectedState]);
+
   // Update state selection and save to preferences
-  const handleStateChange = (newState: string) => {
+  const handleStateChange = useCallback((newState: string) => {
     setSelectedState(newState);
     updatePreference('preferredState', newState);
-  };
-
-  const states = getAllStates();
-  const taxRate = getTaxRate(selectedState);
+  }, [updatePreference]);
 
   // Calculate current amount (either manual input or device price)
-  const getCurrentAmount = (): number => {
+  const getCurrentAmount = useCallback((): number => {
     if (useDevicePrice && selectedDevice) {
       const deviceData = getDeviceData(selectedDevice);
       if (deviceData) {
@@ -51,26 +51,41 @@ export default function Home() {
       }
     }
     return parseFloat(amount) || 0;
-  };
+  }, [useDevicePrice, selectedDevice, usePrepaidPrice, amount]);
 
-  const currentAmount = getCurrentAmount();
-  const taxCalculation = calculateSalesTax(currentAmount, taxRate);
+  // Memoize current amount and tax calculation
+  const currentAmount = useMemo(() => getCurrentAmount(), [getCurrentAmount]);
+  const taxCalculation = useMemo(() => calculateSalesTax(currentAmount, taxRate), [currentAmount, taxRate]);
 
-  const handleDeviceSelect = (device: Device) => {
-    setSelectedDevice(device.name);
-    setUseDevicePrice(true);
-    setUsePrepaidPrice(false);
-    setAmount(device.data.msrp.toString());
-  };
+  const handleDeviceSelect = useCallback((deviceOrName: Device | string) => {
+    let deviceName: string;
+    let deviceData: Device | null;
 
-  const handleManualAmountChange = (value: string) => {
+    // Handle both Device object and string input
+    if (typeof deviceOrName === 'string') {
+      deviceName = deviceOrName;
+      deviceData = getDeviceData(deviceName);
+    } else {
+      deviceName = deviceOrName.name;
+      deviceData = deviceOrName.data;
+    }
+
+    if (deviceData && deviceData.msrp) {
+      setSelectedDevice(deviceName);
+      setUseDevicePrice(true);
+      setUsePrepaidPrice(false);
+      setAmount(deviceData.msrp.toString());
+    }
+  }, []);
+
+  const handleManualAmountChange = useCallback((value: string) => {
     setAmount(value);
     setUseDevicePrice(false);
     setSelectedDevice("");
     setUsePrepaidPrice(false);
-  };
+  }, []);
 
-  const handlePrepaidToggle = () => {
+  const handlePrepaidToggle = useCallback(() => {
     if (selectedDevice && useDevicePrice) {
       const deviceData = getDeviceData(selectedDevice);
       if (deviceData) {
@@ -80,7 +95,11 @@ export default function Home() {
         setAmount(newPrice.toString());
       }
     }
-  };
+  }, [selectedDevice, useDevicePrice, usePrepaidPrice]);
+
+  const handleCloseBanner = useCallback(() => {
+    setShowWarningBanner(false);
+  }, []);
 
   return (
     <>
@@ -109,10 +128,10 @@ export default function Home() {
       <div className="container mx-auto px-4 py-4 relative z-10 min-h-screen overflow-y-auto">
         {/* Warning Banner */}
         {showWarningBanner && (
-          <div className="mb-4 bg-red-600 text-white px-4 py-3 rounded-lg border-2 border-red-700 shadow-lg relative">
+          <div className="mb-8 bg-red-600 text-white px-4 py-3 rounded-xl border-2 border-red-700 shadow-lg relative">
             <button
-              onClick={() => setShowWarningBanner(false)}
-              className="absolute top-2 right-2 p-1 hover:bg-red-700 rounded transition-colors"
+              onClick={handleCloseBanner}
+              className="absolute top-2 right-2 p-1 hover:bg-red-700 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
               aria-label="Close warning banner"
             >
               <X className="h-4 w-4" />
@@ -123,27 +142,14 @@ export default function Home() {
           </div>
         )}
 
-        {/* Header */}
-        <div className="flex justify-center items-start mb-4">
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <h1 className="text-3xl font-bold">
-                <AuroraText 
-                  colors={[
-                    "oklch(0.45 0.08 224)", 
-                    "oklch(0.55 0.12 220)", 
-                    "oklch(0.65 0.15 216)", 
-                    "oklch(0.50 0.10 228)", 
-                    "oklch(0.60 0.13 212)"
-                  ]}
-                  speed={1.2}
-                  className="text-3xl font-bold"
-                >
-                  Sales Tax Calculator
-                </AuroraText>
-              </h1>
-            </div>
-          </div>
+        {/* Main Header */}
+        <div className="text-center mb-12">
+          <AuroraText className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+            Sales Tax Calculator
+          </AuroraText>
+          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            Calculate US state sales tax for any amount or browse our device catalog for accurate pricing
+          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 max-w-7xl mx-auto">
@@ -157,28 +163,27 @@ export default function Home() {
 
           {/* Main Calculator */}
           <div className="lg:col-span-2 order-1 lg:order-2">
-            <Card className="shadow-lg animate-scale-in">
-              <CardHeader className="bg-card dark:bg-card border-b border-border pb-3">
-                <h2 className="text-lg font-semibold leading-none">Tax Calculator</h2>
-                <CardDescription className="text-sm">
-                  Enter an amount or select a device to calculate sales tax
+            <Card className="shadow-lg animate-scale-in card-interactive border border-border/20 bg-card/80 backdrop-blur-md">
+              <CardHeader className="border-b border-border/30 pb-6">
+                <h2 className="text-2xl md:text-3xl font-semibold text-foreground">Calculate Sales Tax</h2>
+                <CardDescription className="text-base text-muted-foreground">
+                  Enter an amount and select a state to calculate the total with sales tax
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4 p-4">
+              <CardContent className="space-y-8">
                 {/* State Selection and Amount Input - Same Row */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <Label htmlFor="state-select" className="flex items-center gap-2 text-sm">
-                      <MapPin className="h-3 w-3" />
-                      Select State
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-3">
+                    <Label htmlFor="state-select" className="text-sm font-medium text-foreground">
+                      State
                     </Label>
                     <Select value={selectedState} onValueChange={handleStateChange}>
-                      <SelectTrigger id="state-select" className="h-9 w-full">
-                        <SelectValue placeholder="Choose a state" />
+                      <SelectTrigger id="state-select" className="h-12 text-base">
+                        <SelectValue placeholder="Select a state" />
                       </SelectTrigger>
-                      <SelectContent position="popper" side="bottom" align="start" avoidCollisions={false}>
+                      <SelectContent>
                         {states.map((state) => (
-                          <SelectItem key={state} value={state}>
+                          <SelectItem key={state} value={state} className="text-base">
                             {state} ({formatPercentage(getTaxRate(state))})
                           </SelectItem>
                         ))}
@@ -186,110 +191,65 @@ export default function Home() {
                     </Select>
                   </div>
 
-                  <div className="space-y-1">
-                    <Label htmlFor="amount-input" className="text-sm">Amount</Label>
-                    <div className="relative w-full">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
-                        $
-                      </span>
-                      <Input
-                        id="amount-input"
-                        type="number"
-                        placeholder="0.00"
-                        value={amount}
-                        onChange={(e) => handleManualAmountChange(e.target.value)}
-                        className="pl-8 h-9 w-full"
-                        step="0.01"
-                        min="0"
-                      />
-                    </div>
-                    {useDevicePrice && selectedDevice && (
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span>Price from: {getDeviceData(selectedDevice)?.displayName || selectedDevice}</span>
-                        {getDeviceData(selectedDevice)?.prepaid && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handlePrepaidToggle}
-                            className="h-5 text-xs px-2"
-                          >
-                            {usePrepaidPrice ? "Switch to MSRP" : "Use Prepaid Price"}
-                          </Button>
-                        )}
-                      </div>
-                    )}
+                  <div className="space-y-3">
+                    <Label htmlFor="amount-input" className="text-sm font-medium text-foreground">Amount ($)</Label>
+                    <Input
+                      id="amount-input"
+                      type="number"
+                      placeholder="Enter amount"
+                      value={amount}
+                      onChange={(e) => handleManualAmountChange(e.target.value)}
+                      className="h-12 text-base"
+                      step="0.01"
+                      min="0"
+                    />
                   </div>
                 </div>
 
                 {/* Device Search */}
-                <div className="space-y-1">
-                  <Label className="flex items-center gap-2 text-sm">
-                    <Search className="h-3 w-3" />
-                    Search All Devices
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-foreground">
+                    Or Select a Device
                   </Label>
                   <EnhancedDeviceSearch
                     value={selectedDevice}
-                    onSelect={(deviceName) => {
-                      const deviceData = getDeviceData(deviceName);
-                      if (deviceData) {
-                        handleDeviceSelect({ name: deviceName, data: deviceData });
-                      }
-                    }}
-                    placeholder="Search from all available devices..."
+                    onSelect={handleDeviceSelect}
+                    placeholder="Search for a device..."
                   />
                 </div>
 
-                <Separator />
+
+
+                <Separator className="my-8" />
 
                 {/* Results */}
-                {currentAmount > 0 && (
-                  <div className="space-y-3 bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-800 dark:to-blue-950 p-4 rounded-xl border transition-opacity duration-150 ease-out transform-gpu">
-                    <h3 className="font-semibold text-base flex items-center gap-2">
-                      <Calculator className="h-4 w-4 text-blue-600" />
-                      Tax Calculation
-                    </h3>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                      <div className="text-center p-4 bg-white dark:bg-slate-900 rounded-xl shadow-sm border transition-all duration-120 ease-out hover:shadow-sm transform-gpu">
-                        <p className="text-xs font-medium text-muted-foreground mb-1">Original Amount</p>
-                        <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                          {formatCurrency(currentAmount)}
-                        </p>
+                <div className="space-y-6">
+                  {currentAmount > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+                      <div className="p-6 bg-muted/50 rounded-xl border border-border/50">
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-2">Original Amount</p>
+                        <p className="text-2xl font-semibold text-foreground">{formatCurrency(currentAmount)}</p>
                       </div>
-                      
-                      <div className="text-center p-4 bg-white dark:bg-slate-900 rounded-xl shadow-sm border transition-all duration-120 ease-out hover:shadow-sm transform-gpu">
-                        <p className="text-xs font-medium text-muted-foreground mb-1">
-                          Sales Tax ({formatPercentage(taxRate)})
-                        </p>
-                        <p className="text-2xl font-bold text-orange-600">
+                      <div className="p-6 bg-orange-50 dark:bg-orange-900/20 rounded-xl border border-orange-200 dark:border-orange-800/50">
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-2">Sales Tax</p>
+                        <p className="text-2xl font-semibold text-orange-600 dark:text-orange-400">
                           {formatCurrency(taxCalculation.taxAmount)}
                         </p>
                       </div>
-                      
-                      <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 rounded-xl border-2 border-blue-200 dark:border-blue-700 shadow-md transition-all duration-120 ease-out hover:shadow-md transform-gpu">
-                        <p className="text-xs font-medium text-muted-foreground mb-1">Total Amount</p>
-                        <p className="text-2xl font-bold text-blue-600">
+                      <div className="p-6 bg-primary/10 rounded-xl border border-primary/30 shadow-sm">
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-2">Total Amount</p>
+                        <p className="text-3xl font-bold text-primary">
                           {formatCurrency(taxCalculation.totalAmount)}
                         </p>
                       </div>
                     </div>
-
-                    <div className="text-center p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg transition-opacity duration-150 ease-out">
-                      <p className="text-xs text-muted-foreground">
-                        Tax rate for <span className="font-medium">{selectedState}</span>: {formatPercentage(taxRate)}
-                        {taxRate === 0 && " (No state sales tax)"}
-                      </p>
+                  ) : (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <Calculator className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p className="text-base">Enter an amount or select a device to see tax calculation</p>
                     </div>
-                  </div>
-                )}
-
-                {currentAmount === 0 && (
-                  <div className="text-center p-8 text-muted-foreground bg-slate-50 dark:bg-slate-800 rounded-xl transition-opacity duration-150 ease-out transform-gpu">
-                    <Calculator className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                    <h3 className="text-base font-medium mb-1">Ready to Calculate</h3>
-                    <p className="text-sm">Enter an amount or select a device to calculate sales tax</p>
-                  </div>
-                )}
+                  )}
+                </div>
               </CardContent>
             </Card>
           </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { Smartphone, RefreshCw, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ interface PopularDevicesSectionProps {
   onDeviceSelect: (device: Device) => void;
 }
 
-export function PopularDevicesSection({ selectedDevice, onDeviceSelect }: PopularDevicesSectionProps) {
+export const PopularDevicesSection = memo(function PopularDevicesSection({ selectedDevice, onDeviceSelect }: PopularDevicesSectionProps) {
   const [popularDevices, setPopularDevices] = useState<Device[]>([]);
   const [isLoadingDevices, setIsLoadingDevices] = useState<boolean>(true);
   const [deviceLoadError, setDeviceLoadError] = useState<string>("");
@@ -104,7 +104,7 @@ export function PopularDevicesSection({ selectedDevice, onDeviceSelect }: Popula
   };
 
   return (
-    <Card className="h-fit animate-scale-in">
+    <Card className="h-fit animate-scale-in card-interactive">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -116,7 +116,7 @@ export function PopularDevicesSection({ selectedDevice, onDeviceSelect }: Popula
             size="sm"
             onClick={handleRefreshDevices}
             disabled={isLoadingDevices}
-            className="h-6 w-6 p-0 transition-all duration-200 ease-out hover:scale-110 hover:bg-blue-50 dark:hover:bg-blue-950 transform-gpu"
+            className="h-6 w-6 p-0 button-enhanced"
             title="Refresh device prices"
           >
             <RefreshCw className={`h-3 w-3 transition-transform duration-500 ease-out ${isLoadingDevices || isRefreshAnimating ? 'animate-spin' : ''}`} />
@@ -139,6 +139,7 @@ export function PopularDevicesSection({ selectedDevice, onDeviceSelect }: Popula
               size="sm" 
               onClick={handleRefreshDevices}
               disabled={isLoadingDevices}
+              className="button-enhanced"
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingDevices ? 'animate-spin' : ''}`} />
               Retry
@@ -153,7 +154,7 @@ export function PopularDevicesSection({ selectedDevice, onDeviceSelect }: Popula
           popularDevices.map((device) => (
           <div
             key={device.name}
-            className={`p-3 rounded-lg border cursor-pointer transition-none transform-gpu will-change-transform touch-action-manipulation select-none active:scale-98 active:transition-none hover:transition-all hover:duration-75 ${
+            className={`p-3 rounded-lg border cursor-pointer card-interactive smooth-press ${
               selectedDevice === device.name
                 ? "border-blue-500 bg-blue-50 dark:bg-blue-950 shadow-sm"
                 : "border-border hover:border-blue-300 hover:shadow-sm"
@@ -179,4 +180,4 @@ export function PopularDevicesSection({ selectedDevice, onDeviceSelect }: Popula
       </CardContent>
     </Card>
   );
-}
+});

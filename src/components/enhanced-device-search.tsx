@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useRef, useEffect } from "react"
+import { useState, useMemo, useRef, useEffect, memo } from "react"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -41,7 +41,7 @@ function extractBrand(deviceName: string): string {
   return 'Other';
 }
 
-export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search devices..." }: EnhancedDeviceSearchProps) {
+export const EnhancedDeviceSearch = memo(function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search devices..." }: EnhancedDeviceSearchProps) {
   const [open, setOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [debouncedQuery, setDebouncedQuery] = useState("")
@@ -136,7 +136,7 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
           role="combobox"
           aria-expanded={open}
           aria-label={value ? `Selected device: ${value}` : "Search and select device"}
-          className="w-full justify-between"
+          className="w-full justify-between button-enhanced"
         >
           {value ? (
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center w-full gap-1 sm:gap-0">
@@ -156,11 +156,12 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-[calc(100vw-2rem)] sm:w-full sm:min-w-[300px] sm:max-w-[400px] lg:max-w-[450px] p-0 z-[100] max-h-[80vh] sm:max-h-[85vh] lg:max-h-[90vh] transform-gpu" 
+        className="w-[calc(100vw-2rem)] sm:w-full sm:min-w-[300px] sm:max-w-[400px] lg:max-w-[450px] p-0 z-[100] max-h-[60vh] sm:max-h-[65vh] lg:max-h-[70vh] transform-gpu" 
         align="start"
         side="bottom"
-        avoidCollisions={false}
-        sideOffset={2}
+        avoidCollisions={true}
+        sideOffset={4}
+        collisionPadding={8}
       >
         <Command>
           <CommandInput 
@@ -172,7 +173,7 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
           <CommandEmpty>No device found.</CommandEmpty>
           <CommandGroup 
             heading="All Devices" 
-            className="max-h-[min(55vh,400px)] sm:max-h-[min(60vh,450px)] lg:max-h-[min(65vh,500px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800 transform-gpu"
+            className="max-h-[min(45vh,350px)] sm:max-h-[min(50vh,400px)] lg:max-h-[min(55vh,450px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800 transform-gpu"
           >
             {filteredDevices.map((deviceName) => {
               const deviceData = getDeviceData(deviceName)
@@ -183,7 +184,7 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
                   key={deviceName}
                   value={deviceName}
                   onSelect={() => handleSelect(deviceName)}
-                  className="cursor-pointer py-1.5 px-2"
+                  className="cursor-pointer py-1.5 px-2 smooth-hover smooth-press"
                 >
                   <Check
                     className={cn(
@@ -219,4 +220,4 @@ export function EnhancedDeviceSearch({ value, onSelect, placeholder = "Search de
       </PopoverContent>
     </Popover>
   )
-}
+});

@@ -127,6 +127,15 @@
   --animate-slide-up: slideUp 180ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --animate-scale-in: scaleIn 150ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --animate-bounce-subtle: bounceSubtle 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --animate-slide-in-up: slideInUp 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --animate-slide-out-down: slideOutDown 200ms cubic-bezier(0.55, 0.055, 0.675, 0.19);
+  --animate-stagger-1: staggerIn 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94) 0ms;
+  --animate-stagger-2: staggerIn 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94) 100ms;
+  --animate-stagger-3: staggerIn 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94) 200ms;
+  --animate-hover-lift: hoverLift 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --animate-focus-ring: focusRing 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --animate-press: press 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --animate-height-auto: heightAuto 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   
   @keyframes aurora {
   0% {
@@ -192,6 +201,84 @@
     to {
       opacity: 1;
       transform: translateZ(0) scale(1);
+    }
+  }
+  
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateZ(0) translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateZ(0) translateY(0);
+    }
+  }
+  
+  @keyframes slideOutDown {
+    from {
+      opacity: 1;
+      transform: translateZ(0) translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateZ(0) translateY(20px);
+    }
+  }
+  
+  @keyframes staggerIn {
+    from {
+      opacity: 0;
+      transform: translateZ(0) translateY(10px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateZ(0) translateY(0) scale(1);
+    }
+  }
+  
+  @keyframes hoverLift {
+    from {
+      transform: translateZ(0) translateY(0);
+    }
+    to {
+      transform: translateZ(0) translateY(-2px);
+    }
+  }
+  
+  @keyframes focusRing {
+    from {
+      box-shadow: 0 0 0 0 hsl(var(--ring) / 0.5);
+    }
+    to {
+      box-shadow: 0 0 0 2px hsl(var(--ring) / 0.5);
+    }
+  }
+  
+  @keyframes press {
+    from {
+      transform: translateZ(0) scale(1);
+    }
+    to {
+      transform: translateZ(0) scale(0.98);
+    }
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+  
+  @keyframes pulse-soft {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.8;
     }
   }
 }
@@ -296,6 +383,23 @@ html {
 
 .animate-bounce-subtle {
   animation: var(--animate-bounce-subtle);
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+/* Enhanced accessibility */
+.focus-visible:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+  border-radius: var(--radius);
 }
 
 /* Performance optimizations for smooth interactions */
@@ -500,6 +604,89 @@ input:focus, select:focus, [role="combobox"]:focus {
   transition: box-shadow var(--dropdown-duration) var(--dropdown-easing-in), transform var(--micro-duration) var(--micro-easing);
 }
 
+/* Enhanced interaction utilities */
+.smooth-hover {
+  transition: all 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform, box-shadow;
+}
+
+.smooth-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -8px hsl(var(--foreground) / 0.15);
+}
+
+.smooth-focus {
+  transition: all 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.smooth-focus:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(var(--ring) / 0.5);
+  transform: scale(1.02);
+}
+
+.smooth-press:active {
+  transform: scale(0.98);
+  transition: transform 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.results-enter {
+  animation: var(--animate-slide-in-up);
+}
+
+.results-exit {
+  animation: var(--animate-slide-out-down);
+}
+
+.stagger-1 {
+  animation: var(--animate-stagger-1);
+}
+
+.stagger-2 {
+  animation: var(--animate-stagger-2);
+}
+
+.stagger-3 {
+  animation: var(--animate-stagger-3);
+}
+
+.card-interactive {
+  transition: all 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform, box-shadow;
+}
+
+.card-interactive:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px -4px hsl(var(--foreground) / 0.1);
+}
+
+.input-enhanced {
+  transition: all 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.input-enhanced:focus {
+  transform: scale(1.01);
+  box-shadow: 0 0 0 2px hsl(var(--ring) / 0.3), 0 2px 8px -2px hsl(var(--ring) / 0.2);
+}
+
+.button-enhanced {
+  transition: all 150ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+}
+
+.button-enhanced:hover {
+  transform: translateY(-1px);
+}
+
+.button-enhanced:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Height transition utility */
+.height-auto {
+  transition: height 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
 /* Improved reduced motion handling */
 @media (prefers-reduced-motion: reduce) {
   :root {
@@ -509,11 +696,22 @@ input:focus, select:focus, [role="combobox"]:focus {
   
   .dropdown-animate-in,
   .dropdown-animate-out,
-  .command-item-stagger {
+  .command-item-stagger,
+  .smooth-hover,
+  .smooth-focus,
+  .smooth-press,
+  .card-interactive,
+  .input-enhanced,
+  .button-enhanced {
     animation: fade-only var(--dropdown-duration) ease-out both !important;
+    transition: opacity var(--dropdown-duration) ease-out !important;
   }
   
-  .list-item-hover:hover {
+  .smooth-hover:hover,
+  .card-interactive:hover,
+  .button-enhanced:hover,
+  .input-enhanced:focus,
+  .smooth-focus:focus-visible {
     transform: none !important;
   }
   
