@@ -1,7 +1,7 @@
 // Google Sheets integration for loading device data
 // Based on the Python implementation that loads from Google Sheets
 
-import { logger, logError, logWarn } from './logger';
+import { logError, logWarn } from './logger';
 
 export interface DeviceData {
   msrp: number;

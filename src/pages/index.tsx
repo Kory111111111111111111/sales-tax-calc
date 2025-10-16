@@ -13,7 +13,7 @@ import {
   LazyCustomStarsBackgroundWithSuspense
 } from "@/components/lazy-components";
 import { PopularDevicesSection } from "@/components/popular-devices-section";
-import { getDeviceData, type Device } from "@/lib/device-data";
+import { getDeviceData, type Device, type DeviceData } from "@/lib/device-data";
 import { 
   getAllStates, 
   getTaxRate, 
@@ -59,7 +59,7 @@ export default function Home() {
 
   const handleDeviceSelect = useCallback((deviceOrName: Device | string) => {
     let deviceName: string;
-    let deviceData: Device | null;
+    let deviceData: DeviceData | null;
 
     // Handle both Device object and string input
     if (typeof deviceOrName === 'string') {
@@ -85,6 +85,8 @@ export default function Home() {
     setUsePrepaidPrice(false);
   }, []);
 
+  // Function for future prepaid pricing toggle feature
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handlePrepaidToggle = useCallback(() => {
     if (selectedDevice && useDevicePrice) {
       const deviceData = getDeviceData(selectedDevice);
