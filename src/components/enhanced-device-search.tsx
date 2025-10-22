@@ -136,27 +136,27 @@ export const EnhancedDeviceSearch = memo(function EnhancedDeviceSearch({ value, 
           role="combobox"
           aria-expanded={open}
           aria-label={value ? `Selected device: ${value}` : "Search and select device"}
-          className="w-full justify-between button-enhanced"
+          className="w-full justify-between button-enhanced h-8 text-sm"
         >
           {value ? (
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center w-full gap-1 sm:gap-0">
-              <span className="font-medium truncate flex-1 sm:mr-4 text-left">
+              <span className="font-medium truncate flex-1 sm:mr-4 text-left text-sm">
                 {value}
               </span>
               {selectedDevice && (
-                <span className="text-muted-foreground text-sm flex-shrink-0 text-left sm:text-right">
+                <span className="text-muted-foreground text-xs flex-shrink-0 text-left sm:text-right">
                   {formatCurrency(selectedDevice.msrp)}
                 </span>
               )}
             </div>
           ) : (
-            placeholder
+            <span className="text-sm">{placeholder}</span>
           )}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-[calc(100vw-2rem)] sm:w-full sm:min-w-[300px] sm:max-w-[400px] lg:max-w-[450px] p-0 z-[100] max-h-[60vh] sm:max-h-[65vh] lg:max-h-[70vh] transform-gpu" 
+        className="w-[calc(100vw-2rem)] sm:w-full sm:min-w-[280px] sm:max-w-[360px] lg:max-w-[400px] p-0 z-[100] max-h-[55vh] sm:max-h-[60vh] lg:max-h-[65vh] transform-gpu overflow-y-auto" 
         align="start"
         side="bottom"
         avoidCollisions={true}
@@ -173,7 +173,7 @@ export const EnhancedDeviceSearch = memo(function EnhancedDeviceSearch({ value, 
           <CommandEmpty>No device found.</CommandEmpty>
           <CommandGroup 
             heading="All Devices" 
-            className="max-h-[min(45vh,350px)] sm:max-h-[min(50vh,400px)] lg:max-h-[min(55vh,450px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800 transform-gpu"
+            className="max-h-[min(45vh,320px)] sm:max-h-[min(50vh,360px)] lg:max-h-[min(55vh,400px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800 transform-gpu"
           >
             {filteredDevices.map((deviceName) => {
               const deviceData = getDeviceData(deviceName)
@@ -184,11 +184,11 @@ export const EnhancedDeviceSearch = memo(function EnhancedDeviceSearch({ value, 
                   key={deviceName}
                   value={deviceName}
                   onSelect={() => handleSelect(deviceName)}
-                  className="cursor-pointer py-1.5 px-2 smooth-hover smooth-press"
+                  className="cursor-pointer py-1 px-2 smooth-hover smooth-press"
                 >
                   <Check
                     className={cn(
-                      "mr-1.5 h-3 w-3",
+                      "mr-1 h-3 w-3",
                       value === deviceName ? "opacity-100" : "opacity-0"
                     )}
                   />
@@ -197,18 +197,18 @@ export const EnhancedDeviceSearch = memo(function EnhancedDeviceSearch({ value, 
                       <span className="font-medium truncate text-xs">
                         {deviceName}
                       </span>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-[10px] text-muted-foreground">
                         {extractBrand(deviceName)}
                       </span>
                     </div>
-                    <div className="text-left sm:text-right flex-shrink-0">
+                    <div className="flex flex-col sm:items-end flex-shrink-0">
                       <span className="text-xs font-medium">
                         {formatCurrency(deviceData.msrp)}
                       </span>
                       {deviceData.prepaid && (
-                        <div className="text-xs text-muted-foreground">
+                        <span className="text-[10px] text-muted-foreground">
                           Prepaid: {formatCurrency(deviceData.prepaid)}
-                        </div>
+                        </span>
                       )}
                     </div>
                   </div>

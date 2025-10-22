@@ -127,10 +127,10 @@ export default function Home() {
         { count: 100, size: 4, speedMultiplier: 4 },
       ]}
     >
-      <div className="container mx-auto px-4 py-4 relative z-10 min-h-screen overflow-y-auto">
+      <div className="container mx-auto px-2 py-2 relative z-10 h-auto sm:h-screen sm:overflow-y-hidden">
         {/* Warning Banner */}
         {showWarningBanner && (
-          <div className="mb-8 bg-red-600 text-white px-4 py-3 rounded-xl border-2 border-red-700 shadow-lg relative">
+          <div className="mb-2 bg-red-600 text-white px-2 py-2 rounded-md border border-red-700 shadow-lg relative">
             <button
               onClick={handleCloseBanner}
               className="absolute top-2 right-2 p-1 hover:bg-red-700 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
@@ -138,23 +138,23 @@ export default function Home() {
             >
               <X className="h-4 w-4" />
             </button>
-            <p className="text-center font-semibold text-sm sm:text-base leading-tight pr-8">
+            <p className="text-center font-medium text-xs sm:text-sm leading-tight pr-6">
               ⚠️ STOP. BEFORE USING THIS TOOL VERIFY YOU ARE WORKING WITH A USCELLULAR CUSTOMER AND NOT A T-MOBILE CUSTOMER. ANY INCORRECT INFORMATION GIVEN IF YOU DO NOT FOLLOW THESE INSTRUCTIONS WILL BE YOUR SOLE RESPONSIBILITY TO FIX.
             </p>
           </div>
         )}
 
         {/* Main Header */}
-        <div className="text-center mb-12">
-          <AuroraText className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+        <div className="text-center mb-4">
+          <AuroraText className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-2 leading-snug">
             Sales Tax Calculator
           </AuroraText>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+          <p className="text-sm md:text-base text-muted-foreground max-w-xl mx-auto leading-snug">
             Calculate US state sales tax for any amount or browse our device catalog for accurate pricing
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 max-w-6xl mx-auto">
           {/* Popular Devices */}
           <div className="lg:col-span-1 order-2 lg:order-1">
             <PopularDevicesSection 
@@ -166,26 +166,26 @@ export default function Home() {
           {/* Main Calculator */}
           <div className="lg:col-span-2 order-1 lg:order-2">
             <Card className="shadow-lg animate-scale-in card-interactive border border-border/20 bg-card/80 backdrop-blur-md">
-              <CardHeader className="border-b border-border/30 pb-6">
-                <h2 className="text-2xl md:text-3xl font-semibold text-foreground">Calculate Sales Tax</h2>
-                <CardDescription className="text-base text-muted-foreground">
+              <CardHeader className="border-b border-border/30 pb-3">
+                <h2 className="text-lg md:text-xl font-semibold text-foreground">Calculate Sales Tax</h2>
+                <CardDescription className="text-sm text-muted-foreground">
                   Enter an amount and select a state to calculate the total with sales tax
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-8">
+              <CardContent className="space-y-4">
                 {/* State Selection and Amount Input - Same Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-3">
-                    <Label htmlFor="state-select" className="text-sm font-medium text-foreground">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="state-select" className="text-xs font-medium text-foreground">
                       State
                     </Label>
                     <Select value={selectedState} onValueChange={handleStateChange}>
-                      <SelectTrigger id="state-select" className="h-12 text-base">
+                      <SelectTrigger id="state-select" className="h-8 text-sm">
                         <SelectValue placeholder="Select a state" />
                       </SelectTrigger>
                       <SelectContent>
                         {states.map((state) => (
-                          <SelectItem key={state} value={state} className="text-base">
+                          <SelectItem key={state} value={state} className="text-sm">
                             {state} ({formatPercentage(getTaxRate(state))})
                           </SelectItem>
                         ))}
@@ -193,15 +193,15 @@ export default function Home() {
                     </Select>
                   </div>
 
-                  <div className="space-y-3">
-                    <Label htmlFor="amount-input" className="text-sm font-medium text-foreground">Amount ($)</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="amount-input" className="text-xs font-medium text-foreground">Amount ($)</Label>
                     <Input
                       id="amount-input"
                       type="number"
                       placeholder="Enter amount"
                       value={amount}
                       onChange={(e) => handleManualAmountChange(e.target.value)}
-                      className="h-12 text-base"
+                      className="h-8 text-sm"
                       step="0.01"
                       min="0"
                     />
@@ -209,8 +209,8 @@ export default function Home() {
                 </div>
 
                 {/* Device Search */}
-                <div className="space-y-3">
-                  <Label className="text-sm font-medium text-foreground">
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium text-foreground">
                     Or Select a Device
                   </Label>
                   <EnhancedDeviceSearch
@@ -222,33 +222,33 @@ export default function Home() {
 
 
 
-                <Separator className="my-8" />
+                <Separator className="my-4" />
 
                 {/* Results */}
-                <div className="space-y-6">
+                <div className="space-y-4">
                   {currentAmount > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
-                      <div className="p-6 bg-muted/50 rounded-xl border border-border/50">
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-2">Original Amount</p>
-                        <p className="text-2xl font-semibold text-foreground">{formatCurrency(currentAmount)}</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
+                      <div className="p-3 bg-muted/50 rounded-xl border border-border/50">
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium mb-1">Original Amount</p>
+                        <p className="text-lg font-semibold text-foreground">{formatCurrency(currentAmount)}</p>
                       </div>
-                      <div className="p-6 bg-orange-50 dark:bg-orange-900/20 rounded-xl border border-orange-200 dark:border-orange-800/50">
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-2">Sales Tax</p>
-                        <p className="text-2xl font-semibold text-orange-600 dark:text-orange-400">
+                      <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-xl border border-orange-200 dark:border-orange-800/50">
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium mb-1">Sales Tax</p>
+                        <p className="text-lg font-semibold text-orange-600 dark:text-orange-400">
                           {formatCurrency(taxCalculation.taxAmount)}
                         </p>
                       </div>
-                      <div className="p-6 bg-primary/10 rounded-xl border border-primary/30 shadow-sm">
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-2">Total Amount</p>
-                        <p className="text-3xl font-bold text-primary">
+                      <div className="p-3 bg-primary/10 rounded-xl border border-primary/30 shadow-sm">
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium mb-1">Total Amount</p>
+                        <p className="text-xl font-bold text-primary">
                           {formatCurrency(taxCalculation.totalAmount)}
                         </p>
                       </div>
                     </div>
                   ) : (
-                    <div className="text-center py-12 text-muted-foreground">
-                      <Calculator className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p className="text-base">Enter an amount or select a device to see tax calculation</p>
+                    <div className="text-center py-6 text-muted-foreground">
+                      <Calculator className="h-8 w-8 mx-auto mb-3 opacity-50" />
+                      <p className="text-sm">Enter an amount or select a device to see tax calculation</p>
                     </div>
                   )}
                 </div>

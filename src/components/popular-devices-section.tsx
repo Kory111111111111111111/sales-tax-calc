@@ -105,11 +105,11 @@ export const PopularDevicesSection = memo(function PopularDevicesSection({ selec
 
   return (
     <Card className="h-fit animate-scale-in card-interactive">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Smartphone className="h-4 w-4 text-blue-600 animate-bounce-subtle" />
-            <h3 className="text-base font-semibold leading-none">Popular Devices</h3>
+            <h3 className="text-sm font-semibold leading-none">Popular Devices</h3>
           </div>
           <Button
             variant="ghost"
@@ -131,9 +131,9 @@ export const PopularDevicesSection = memo(function PopularDevicesSection({ selec
         {isLoadingDevices ? (
           <DeviceSkeletonList count={4} />
         ) : deviceLoadError ? (
-          <div className="text-center py-6 text-muted-foreground">
-            <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm mb-3">{deviceLoadError}</p>
+          <div className="text-center py-4 text-muted-foreground">
+            <AlertCircle className="h-6 w-6 mx-auto mb-2 opacity-50" />
+            <p className="text-xs mb-2">{deviceLoadError}</p>
             <Button 
               variant="outline" 
               size="sm" 
@@ -146,15 +146,15 @@ export const PopularDevicesSection = memo(function PopularDevicesSection({ selec
             </Button>
           </div>
         ) : popularDevices.length === 0 ? (
-          <div className="text-center py-6 text-muted-foreground">
-            <Smartphone className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">No devices available</p>
+          <div className="text-center py-4 text-muted-foreground">
+            <Smartphone className="h-6 w-6 mx-auto mb-2 opacity-50" />
+            <p className="text-xs">No devices available</p>
           </div>
         ) : (
           popularDevices.map((device) => (
           <div
             key={device.name}
-            className={`p-3 rounded-lg border cursor-pointer card-interactive smooth-press ${
+            className={`p-2 rounded-lg border cursor-pointer card-interactive smooth-press ${
               selectedDevice === device.name
                 ? "border-blue-500 bg-blue-50 dark:bg-blue-950 shadow-sm"
                 : "border-border hover:border-blue-300 hover:shadow-sm"
@@ -165,12 +165,12 @@ export const PopularDevicesSection = memo(function PopularDevicesSection({ selec
               <span className="font-medium text-xs leading-tight flex-1">
                 {device.data.displayName || device.name}
               </span>
-              <Badge variant="secondary" className="text-xs font-bold px-2 py-1 self-start sm:self-auto">
+              <Badge variant="secondary" className="text-[10px] font-bold px-2 py-0.5 self-start sm:self-auto">
                 {formatCurrency(device.data.msrp)}
               </Badge>
             </div>
             {device.data.prepaid && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-[10px] text-muted-foreground">
                 Prepaid: {formatCurrency(device.data.prepaid)}
               </p>
             )}

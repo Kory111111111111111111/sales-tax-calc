@@ -113,7 +113,7 @@ export function CalculationHistory({ onSelectCalculation }: CalculationHistoryPr
           History ({history.length})
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden sm:overflow-hidden overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <History className="h-5 w-5" />
