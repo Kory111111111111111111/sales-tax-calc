@@ -108,7 +108,7 @@ export const PopularDevicesSection = memo(function PopularDevicesSection({ selec
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Smartphone className="h-4 w-4 text-blue-600 animate-bounce-subtle" />
+            <Smartphone className="h-4 w-4 text-primary animate-bounce-subtle" />
             <h3 className="text-sm font-semibold leading-none">Popular Devices</h3>
           </div>
           <Button
@@ -156,8 +156,8 @@ export const PopularDevicesSection = memo(function PopularDevicesSection({ selec
             key={device.name}
             className={`p-2 rounded-lg border cursor-pointer card-interactive smooth-press ${
               selectedDevice === device.name
-                ? "border-blue-500 bg-blue-50 dark:bg-blue-950 shadow-sm"
-                : "border-border hover:border-blue-300 hover:shadow-sm"
+                ? "border-primary bg-primary/10 dark:bg-primary/20 shadow-sm"
+                : "border-border hover:border-primary hover:shadow-sm"
             }`}
             onClick={() => onDeviceSelect(device)}
           >

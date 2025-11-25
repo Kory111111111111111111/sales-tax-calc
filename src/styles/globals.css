@@ -363,7 +363,7 @@ html {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
     letter-spacing: var(--tracking-normal);
   }
 }
@@ -403,10 +403,10 @@ html {
 }
 
 /* Performance optimizations for smooth interactions */
-* {
-  /* Enable hardware acceleration for transforms and opacity */
-  will-change: auto;
-}
+/* Removed global will-change to prevent excessive painting and layout costs */
+/* Previously: * { will-change: auto; } */
+/* Intentionally avoid global will-change; apply on specific interactive classes only */
+/* No global will-change applied */
 
 /* Enhanced transition defaults for ultra-smooth animations */
 .transition-all {

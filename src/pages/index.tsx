@@ -1,31 +1,46 @@
 import { useState, useMemo, useCallback } from "react";
 import Head from "next/head";
-import { Calculator, X } from "lucide-react";
+import { Calculator, X, Check, ChevronsUpDown, DollarSign } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { AuroraText } from "@/components/ui/aurora-text";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { EnhancedDeviceSearch } from "@/components/enhanced-device-search";
-import { 
+import {
   LazyCustomStarsBackgroundWithSuspense
 } from "@/components/lazy-components";
 import { PopularDevicesSection } from "@/components/popular-devices-section";
 import { getDeviceData, type Device, type DeviceData } from "@/lib/device-data";
-import { 
-  getAllStates, 
-  getTaxRate, 
-  calculateSalesTax, 
-  formatCurrency, 
-  formatPercentage 
+import {
+  getAllStates,
+  getTaxRate,
+  calculateSalesTax,
+  formatCurrency,
+  formatPercentage
 } from "@/lib/tax-data";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 export default function Home() {
   const { preferences, updatePreference } = useUserPreferences();
-  
+
   const [selectedState, setSelectedState] = useState<string>(preferences.preferredState || "Maine");
+  const [openStateCombobox, setOpenStateCombobox] = useState(false);
   const [amount, setAmount] = useState<string>("");
   const [selectedDevice, setSelectedDevice] = useState<string>("");
   const [useDevicePrice, setUseDevicePrice] = useState<boolean>(false);
@@ -40,6 +55,7 @@ export default function Home() {
   const handleStateChange = useCallback((newState: string) => {
     setSelectedState(newState);
     updatePreference('preferredState', newState);
+    setOpenStateCombobox(false);
   }, [updatePreference]);
 
   // Calculate current amount (either manual input or device price)
@@ -112,152 +128,208 @@ export default function Home() {
         <meta name="author" content="Sales Tax Calculator" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
-      <LazyCustomStarsBackgroundWithSuspense 
-      className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800"
-      starColor="rgba(147, 197, 253, 0.6)"
-      speed={60}
-      factor={0.03}
-      starLayers={[
-        { count: 3000, size: 0.5, speedMultiplier: 0.5 },
-        { count: 2000, size: 1, speedMultiplier: 1 },
-        { count: 1200, size: 1.5, speedMultiplier: 1.5 },
-        { count: 800, size: 2, speedMultiplier: 2 },
-        { count: 400, size: 2.5, speedMultiplier: 2.5 },
-        { count: 200, size: 3, speedMultiplier: 3 },
-        { count: 100, size: 4, speedMultiplier: 4 },
-      ]}
-    >
-      <div className="container mx-auto px-2 py-2 relative z-10 h-auto sm:h-screen sm:overflow-y-hidden">
-        {/* Warning Banner */}
-        {showWarningBanner && (
-          <div className="mb-2 bg-red-600 text-white px-2 py-2 rounded-md border border-red-700 shadow-lg relative">
-            <button
-              onClick={handleCloseBanner}
-              className="absolute top-2 right-2 p-1 hover:bg-red-700 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-              aria-label="Close warning banner"
-            >
-              <X className="h-4 w-4" />
-            </button>
-            <p className="text-center font-medium text-xs sm:text-sm leading-tight pr-6">
-              ⚠️ STOP. BEFORE USING THIS TOOL VERIFY YOU ARE WORKING WITH A USCELLULAR CUSTOMER AND NOT A T-MOBILE CUSTOMER. ANY INCORRECT INFORMATION GIVEN IF YOU DO NOT FOLLOW THESE INSTRUCTIONS WILL BE YOUR SOLE RESPONSIBILITY TO FIX.
+      <LazyCustomStarsBackgroundWithSuspense
+        className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex flex-col"
+        starColor="rgba(147, 197, 253, 0.6)"
+        speed={60}
+        factor={0.03}
+        starLayers={[
+          { count: 3000, size: 0.5, speedMultiplier: 0.5 },
+          { count: 2000, size: 1, speedMultiplier: 1 },
+          { count: 1200, size: 1.5, speedMultiplier: 1.5 },
+          { count: 800, size: 2, speedMultiplier: 2 },
+          { count: 400, size: 2.5, speedMultiplier: 2.5 },
+          { count: 200, size: 3, speedMultiplier: 3 },
+          { count: 100, size: 4, speedMultiplier: 4 },
+        ]}
+      >
+        <div className="container mx-auto px-4 py-6 relative z-10 flex-grow">
+          {/* Warning Banner */}
+          {showWarningBanner && (
+            <div className="mb-6 bg-red-500/10 border border-red-500/20 text-red-200 px-4 py-3 rounded-lg shadow-lg relative backdrop-blur-sm animate-fade-in">
+              <button
+                onClick={handleCloseBanner}
+                className="absolute top-2 right-2 p-1 hover:bg-red-500/20 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500/50"
+                aria-label="Close warning banner"
+              >
+                <X className="h-4 w-4" />
+              </button>
+              <div className="flex items-start gap-3 pr-8">
+                <span className="text-xl">⚠️</span>
+                <p className="text-sm font-medium leading-relaxed">
+                  <span className="font-bold block mb-1">Important Notice</span>
+                  Before using this tool, verify you are working with a UScellular customer. Information provided here may not apply to other carriers.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Main Header */}
+          <div className="text-center mb-8">
+            <AuroraText className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight tracking-tight">
+              Sales Tax Calculator
+            </AuroraText>
+            <p className="text-base md:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
+              Calculate US state sales tax instantly. Enter an amount or select a device to get started.
             </p>
           </div>
-        )}
 
-        {/* Main Header */}
-        <div className="text-center mb-4">
-          <AuroraText className="text-2xl md:text-3xl lg:text-4xl font-semibold mb-2 leading-snug">
-            Sales Tax Calculator
-          </AuroraText>
-          <p className="text-sm md:text-base text-muted-foreground max-w-xl mx-auto leading-snug">
-            Calculate US state sales tax for any amount or browse our device catalog for accurate pricing
-          </p>
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-6xl mx-auto">
+            {/* Popular Devices - Takes up 4 columns on large screens */}
+            <div className="lg:col-span-4 order-2 lg:order-1">
+              <PopularDevicesSection
+                selectedDevice={selectedDevice}
+                onDeviceSelect={handleDeviceSelect}
+              />
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 max-w-6xl mx-auto">
-          {/* Popular Devices */}
-          <div className="lg:col-span-1 order-2 lg:order-1">
-            <PopularDevicesSection 
-              selectedDevice={selectedDevice}
-              onDeviceSelect={handleDeviceSelect}
-            />
-          </div>
+            {/* Main Calculator - Takes up 8 columns on large screens */}
+            <div className="lg:col-span-8 order-1 lg:order-2">
+              <Card className="shadow-2xl animate-scale-in card-interactive border border-white/10 bg-slate-900/50 backdrop-blur-xl h-full">
+                <CardHeader className="border-b border-white/5 pb-6">
+                  <h2 className="text-2xl font-semibold text-white flex items-center gap-2">
+                    <Calculator className="h-6 w-6 text-primary" />
+                    Calculate Tax
+                  </h2>
+                  <CardDescription className="text-slate-400 text-base">
+                    Select your state and enter an amount to see the breakdown
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-8 pt-6">
+                  {/* State Selection and Amount Input */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium text-slate-300">
+                        State
+                      </Label>
+                      <Popover open={openStateCombobox} onOpenChange={setOpenStateCombobox}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={openStateCombobox}
+                            className="w-full justify-between bg-slate-950/50 border-white/10 text-slate-200 hover:bg-slate-800 hover:text-white h-11"
+                          >
+                            {selectedState
+                              ? `${selectedState} (${formatPercentage(getTaxRate(selectedState))})`
+                              : "Select state..."}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[300px] p-0 bg-slate-900 border-white/10">
+                          <Command className="bg-transparent">
+                            <CommandInput placeholder="Search state..." className="h-11" />
+                            <CommandList>
+                              <CommandEmpty>No state found.</CommandEmpty>
+                              <CommandGroup>
+                                {states.map((state) => (
+                                  <CommandItem
+                                    key={state}
+                                    value={state}
+                                    onSelect={(currentValue) => {
+                                      handleStateChange(currentValue === selectedState ? "" : currentValue)
+                                      setOpenStateCombobox(false)
+                                    }}
+                                    className="text-slate-200 aria-selected:bg-slate-800 aria-selected:text-white"
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        selectedState === state ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                    {state}
+                                    <span className="ml-auto text-slate-500 text-xs">
+                                      {formatPercentage(getTaxRate(state))}
+                                    </span>
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                    </div>
 
-          {/* Main Calculator */}
-          <div className="lg:col-span-2 order-1 lg:order-2">
-            <Card className="shadow-lg animate-scale-in card-interactive border border-border/20 bg-card/80 backdrop-blur-md">
-              <CardHeader className="border-b border-border/30 pb-3">
-                <h2 className="text-lg md:text-xl font-semibold text-foreground">Calculate Sales Tax</h2>
-                <CardDescription className="text-sm text-muted-foreground">
-                  Enter an amount and select a state to calculate the total with sales tax
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* State Selection and Amount Input - Same Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="state-select" className="text-xs font-medium text-foreground">
-                      State
-                    </Label>
-                    <Select value={selectedState} onValueChange={handleStateChange}>
-                      <SelectTrigger id="state-select" className="h-8 text-sm">
-                        <SelectValue placeholder="Select a state" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {states.map((state) => (
-                          <SelectItem key={state} value={state} className="text-sm">
-                            {state} ({formatPercentage(getTaxRate(state))})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="space-y-3">
+                      <Label htmlFor="amount-input" className="text-sm font-medium text-slate-300">Amount</Label>
+                      <div className="relative">
+                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                        <Input
+                          id="amount-input"
+                          type="number"
+                          placeholder="0.00"
+                          value={amount}
+                          onChange={(e) => handleManualAmountChange(e.target.value)}
+                          className="pl-9 h-11 bg-slate-950/50 border-white/10 text-slate-200 placeholder:text-slate-600 focus-visible:ring-primary/50"
+                          step="0.01"
+                          min="0"
+                        />
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="amount-input" className="text-xs font-medium text-foreground">Amount ($)</Label>
-                    <Input
-                      id="amount-input"
-                      type="number"
-                      placeholder="Enter amount"
-                      value={amount}
-                      onChange={(e) => handleManualAmountChange(e.target.value)}
-                      className="h-8 text-sm"
-                      step="0.01"
-                      min="0"
+                  {/* Device Search */}
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-slate-300">
+                      Or Select a Device
+                    </Label>
+                    <EnhancedDeviceSearch
+                      value={selectedDevice}
+                      onSelect={handleDeviceSelect}
+                      placeholder="Search for a device..."
                     />
                   </div>
-                </div>
 
-                {/* Device Search */}
-                <div className="space-y-2">
-                  <Label className="text-xs font-medium text-foreground">
-                    Or Select a Device
-                  </Label>
-                  <EnhancedDeviceSearch
-                    value={selectedDevice}
-                    onSelect={handleDeviceSelect}
-                    placeholder="Search for a device..."
-                  />
-                </div>
+                  <Separator className="bg-white/10" />
 
-
-
-                <Separator className="my-4" />
-
-                {/* Results */}
-                <div className="space-y-4">
-                  {currentAmount > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
-                      <div className="p-3 bg-muted/50 rounded-xl border border-border/50">
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium mb-1">Original Amount</p>
-                        <p className="text-lg font-semibold text-foreground">{formatCurrency(currentAmount)}</p>
+                  {/* Results */}
+                  <div className="space-y-4">
+                    {currentAmount > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                        <div className="p-4 bg-slate-950/30 rounded-xl border border-white/5">
+                          <p className="text-xs text-slate-500 uppercase tracking-wider font-medium mb-1">Original Amount</p>
+                          <p className="text-xl font-semibold text-slate-200">{formatCurrency(currentAmount)}</p>
+                        </div>
+                        <div className="p-4 bg-orange-500/10 rounded-xl border border-orange-500/20">
+                          <p className="text-xs text-orange-400/80 uppercase tracking-wider font-medium mb-1">Sales Tax</p>
+                          <p className="text-xl font-semibold text-orange-400">
+                            {formatCurrency(taxCalculation.taxAmount)}
+                          </p>
+                        </div>
+                        <div className="p-4 bg-primary/10 rounded-xl border border-primary/20 shadow-lg shadow-primary/5">
+                          <p className="text-xs text-primary/80 uppercase tracking-wider font-medium mb-1">Total Amount</p>
+                          <p className="text-2xl font-bold text-primary">
+                            {formatCurrency(taxCalculation.totalAmount)}
+                          </p>
+                        </div>
                       </div>
-                      <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-xl border border-orange-200 dark:border-orange-800/50">
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium mb-1">Sales Tax</p>
-                        <p className="text-lg font-semibold text-orange-600 dark:text-orange-400">
-                          {formatCurrency(taxCalculation.taxAmount)}
-                        </p>
+                    ) : (
+                      <div className="text-center py-8 text-slate-500">
+                        <Calculator className="h-10 w-10 mx-auto mb-4 opacity-20" />
+                        <p className="text-base">Enter an amount or select a device to see tax calculation</p>
                       </div>
-                      <div className="p-3 bg-primary/10 rounded-xl border border-primary/30 shadow-sm">
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium mb-1">Total Amount</p>
-                        <p className="text-xl font-bold text-primary">
-                          {formatCurrency(taxCalculation.totalAmount)}
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-center py-6 text-muted-foreground">
-                      <Calculator className="h-8 w-8 mx-auto mb-3 opacity-50" />
-                      <p className="text-sm">Enter an amount or select a device to see tax calculation</p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
-      </div>
-    </LazyCustomStarsBackgroundWithSuspense>
+
+        {/* Footer */}
+        <footer className="w-full py-6 mt-auto border-t border-white/5 bg-slate-950/30 backdrop-blur-sm relative z-10">
+          <div className="container mx-auto px-4 text-center">
+            <p className="text-sm text-slate-500">
+              © {new Date().getFullYear()} Sales Tax Calculator. All rights reserved.
+            </p>
+            <p className="text-xs text-slate-600 mt-2">
+              Tax rates are estimates and may vary. Always verify with official sources.
+            </p>
+          </div>
+        </footer>
+      </LazyCustomStarsBackgroundWithSuspense>
     </>
   );
 }
+
