@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DeviceSkeletonList } from "@/components/device-skeleton";
 import { toast } from "sonner";
-import { 
-  getPopularDevices, 
+import {
+  getPopularDevices,
   initializeDeviceData,
   refreshDeviceData,
   getLoadingStatus,
-  type Device 
+  type Device
 } from "@/lib/device-data";
 import { formatCurrency } from "@/lib/tax-data";
 import { logInfo, logError } from "@/lib/logger";
@@ -24,7 +24,6 @@ export const PopularDevicesSection = memo(function PopularDevicesSection({ selec
   const [popularDevices, setPopularDevices] = useState<Device[]>([]);
   const [isLoadingDevices, setIsLoadingDevices] = useState<boolean>(true);
   const [deviceLoadError, setDeviceLoadError] = useState<string>("");
-  const [isRefreshAnimating, setIsRefreshAnimating] = useState<boolean>(false);
 
   // Load device data on component mount (deferred)
   useEffect(() => {
@@ -32,24 +31,24 @@ export const PopularDevicesSection = memo(function PopularDevicesSection({ selec
       try {
         setIsLoadingDevices(true);
         setDeviceLoadError("");
-        
+
         logInfo('Starting device data initialization...');
-        
+
         // Use setTimeout to defer this heavy operation
         await new Promise(resolve => setTimeout(resolve, 100));
         await initializeDeviceData();
-        
+
         const status = getLoadingStatus();
         logInfo(`Final status: ${status.deviceCount} devices loaded`);
-        
+
         setPopularDevices(getPopularDevices(4));
-        
+
         if (status.deviceCount === 0) {
           setDeviceLoadError("No devices loaded from Google Sheets");
         } else {
           toast.success(`Loaded ${status.deviceCount} devices successfully`);
         }
-        
+
       } catch (error) {
         logError('Error loading device data:', error);
         setDeviceLoadError("Failed to load device data");
@@ -68,35 +67,31 @@ export const PopularDevicesSection = memo(function PopularDevicesSection({ selec
   // Refresh device data function
   const handleRefreshDevices = async () => {
     try {
-      // Trigger animation
-      setIsRefreshAnimating(true);
-      setTimeout(() => setIsRefreshAnimating(false), 2000);
-      
       setIsLoadingDevices(true);
       setDeviceLoadError("");
-      
+
       toast.loading("Refreshing device data...", { id: "refresh-devices" });
-      
+
       await refreshDeviceData();
       setPopularDevices(getPopularDevices(4));
-      
+
       const status = getLoadingStatus();
       logInfo(`Refreshed ${status.deviceCount} devices`);
-      
+
       if (status.deviceCount > 0) {
-        toast.success(`Successfully refreshed ${status.deviceCount} devices with latest prices`, { 
-          id: "refresh-devices" 
+        toast.success(`Successfully refreshed ${status.deviceCount} devices with latest prices`, {
+          id: "refresh-devices"
         });
       } else {
         toast.error("No devices found after refresh", { id: "refresh-devices" });
         setDeviceLoadError("Failed to refresh device data");
       }
-      
+
     } catch (error) {
       logError('Error refreshing device data:', error);
       setDeviceLoadError("Failed to refresh device data");
-      toast.error("Failed to refresh device data. Please try again.", { 
-        id: "refresh-devices" 
+      toast.error("Failed to refresh device data. Please try again.", {
+        id: "refresh-devices"
       });
     } finally {
       setIsLoadingDevices(false);
@@ -119,7 +114,7 @@ export const PopularDevicesSection = memo(function PopularDevicesSection({ selec
             className="h-6 w-6 p-0 button-enhanced"
             title="Refresh device prices"
           >
-            <RefreshCw className={`h-3 w-3 transition-transform duration-500 ease-out ${isLoadingDevices || isRefreshAnimating ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-3 w-3 transition-transform duration-500 ease-out ${isLoadingDevices ? 'animate-spin' : ''}`} />
           </Button>
         </div>
         <CardDescription className="text-xs animate-fade-in">
@@ -134,9 +129,9 @@ export const PopularDevicesSection = memo(function PopularDevicesSection({ selec
           <div className="text-center py-4 text-muted-foreground">
             <AlertCircle className="h-6 w-6 mx-auto mb-2 opacity-50" />
             <p className="text-xs mb-2">{deviceLoadError}</p>
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleRefreshDevices}
               disabled={isLoadingDevices}
               className="button-enhanced"
@@ -152,29 +147,28 @@ export const PopularDevicesSection = memo(function PopularDevicesSection({ selec
           </div>
         ) : (
           popularDevices.map((device) => (
-          <div
-            key={device.name}
-            className={`p-2 rounded-lg border cursor-pointer card-interactive smooth-press ${
-              selectedDevice === device.name
-                ? "border-primary bg-primary/10 dark:bg-primary/20 shadow-sm"
-                : "border-border hover:border-primary hover:shadow-sm"
-            }`}
-            onClick={() => onDeviceSelect(device)}
-          >
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-1 gap-1 sm:gap-0">
-              <span className="font-medium text-xs leading-tight flex-1">
-                {device.data.displayName || device.name}
-              </span>
-              <Badge variant="secondary" className="text-[10px] font-bold px-2 py-0.5 self-start sm:self-auto">
-                {formatCurrency(device.data.msrp)}
-              </Badge>
+            <div
+              key={device.name}
+              className={`p-2 rounded-lg border cursor-pointer card-interactive smooth-press ${selectedDevice === device.name
+                  ? "border-primary bg-primary/10 dark:bg-primary/20 shadow-sm"
+                  : "border-border hover:border-primary hover:shadow-sm"
+                }`}
+              onClick={() => onDeviceSelect(device)}
+            >
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-1 gap-1 sm:gap-0">
+                <span className="font-medium text-xs leading-tight flex-1">
+                  {device.data.displayName || device.name}
+                </span>
+                <Badge variant="secondary" className="text-[10px] font-bold px-2 py-0.5 self-start sm:self-auto">
+                  {formatCurrency(device.data.msrp)}
+                </Badge>
+              </div>
+              {device.data.prepaid && (
+                <p className="text-[10px] text-muted-foreground">
+                  Prepaid: {formatCurrency(device.data.prepaid)}
+                </p>
+              )}
             </div>
-            {device.data.prepaid && (
-              <p className="text-[10px] text-muted-foreground">
-                Prepaid: {formatCurrency(device.data.prepaid)}
-              </p>
-            )}
-          </div>
           ))
         )}
       </CardContent>
