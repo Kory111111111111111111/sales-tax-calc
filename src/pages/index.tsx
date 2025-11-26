@@ -146,10 +146,10 @@ export default function Home() {
         <div className="container mx-auto px-4 py-6 relative z-10 flex-grow">
           {/* Warning Banner */}
           {showWarningBanner && (
-            <div className="mb-6 bg-red-500/10 border border-red-500/20 text-red-200 px-4 py-3 rounded-lg shadow-lg relative backdrop-blur-sm animate-fade-in">
+            <div className="mb-6 bg-red-950/80 border border-red-500/50 text-white px-4 py-3 rounded-lg shadow-lg relative backdrop-blur-md animate-fade-in">
               <button
                 onClick={handleCloseBanner}
-                className="absolute top-2 right-2 p-1 hover:bg-red-500/20 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500/50"
+                className="absolute top-2 right-2 p-1 hover:bg-red-500/40 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500/50"
                 aria-label="Close warning banner"
               >
                 <X className="h-4 w-4" />
