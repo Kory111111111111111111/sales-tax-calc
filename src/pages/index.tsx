@@ -320,11 +320,19 @@ export default function Home() {
         {/* Footer */}
         <footer className="w-full py-6 mt-auto border-t border-white/5 bg-slate-950/30 backdrop-blur-sm relative z-10">
           <div className="container mx-auto px-4 text-center">
-            <p className="text-sm text-slate-500">
-              © {new Date().getFullYear()} Sales Tax Calculator. All rights reserved.
-            </p>
-            <p className="text-xs text-slate-600 mt-2">
+            <p className="text-xs text-slate-600">
               Tax rates are estimates and may vary. Always verify with official sources.
+            </p>
+            <p className="text-xs text-slate-500 mt-2">
+              Powered by{" "}
+              <a
+                href="https://wavfinaudio.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-400 hover:text-slate-300 underline transition-colors"
+              >
+                WAVFin Audio
+              </a>
             </p>
           </div>
         </footer>
