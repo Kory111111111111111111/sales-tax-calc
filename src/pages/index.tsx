@@ -215,12 +215,12 @@ export default function Home() {
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-[300px] p-0 bg-slate-900 border-white/10">
-                          <Command className="bg-transparent">
-                            <CommandInput placeholder="Search state..." className="h-11" />
+                        <PopoverContent className="w-[300px] p-0 bg-slate-900 border border-white/10 shadow-xl transform-gpu">
+                          <Command className="bg-transparent text-slate-100">
+                            <CommandInput placeholder="Search state..." className="h-11 placeholder:text-slate-500" />
                             <CommandList>
                               <CommandEmpty>No state found.</CommandEmpty>
-                              <CommandGroup className="max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+                              <CommandGroup className="max-h-[min(45vh,320px)] sm:max-h-[min(50vh,360px)] lg:max-h-[min(55vh,400px)] overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent transform-gpu">
                                 {stateOptions.map(({ name: state, formattedRate }) => (
                                   <CommandItem
                                     key={state}

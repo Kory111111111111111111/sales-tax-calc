@@ -199,24 +199,25 @@ export const EnhancedDeviceSearch = memo(function EnhancedDeviceSearch({ value, 
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-[calc(100vw-2rem)] sm:w-full sm:min-w-[280px] sm:max-w-[360px] lg:max-w-[400px] p-0 z-[100] max-h-[55vh] sm:max-h-[60vh] lg:max-h-[65vh] transform-gpu overflow-y-auto" 
+        className="w-[calc(100vw-2rem)] sm:w-full sm:min-w-[280px] sm:max-w-[360px] lg:max-w-[400px] p-0 z-[100] max-h-[55vh] sm:max-h-[60vh] lg:max-h-[65vh] transform-gpu overflow-y-auto bg-slate-900 border border-white/10 shadow-xl" 
         align="start"
         side="bottom"
         avoidCollisions={true}
         sideOffset={4}
         collisionPadding={8}
       >
-        <Command>
+        <Command className="bg-transparent text-slate-100">
           <CommandInput 
             placeholder="Search devices..." 
             value={searchQuery}
             onValueChange={setSearchQuery}
+            className="placeholder:text-slate-500"
           />
           
           <CommandEmpty>No device found.</CommandEmpty>
           <CommandGroup 
             heading="All Devices" 
-            className="max-h-[min(45vh,320px)] sm:max-h-[min(50vh,360px)] lg:max-h-[min(55vh,400px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800 transform-gpu"
+            className="max-h-[min(45vh,320px)] sm:max-h-[min(50vh,360px)] lg:max-h-[min(55vh,400px)] overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent transform-gpu"
           >
             {deviceEntries.map(({ name: deviceName, data: deviceData }) => (
                 <CommandItem
