@@ -11,7 +11,6 @@ import { EnhancedDeviceSearch } from "@/components/enhanced-device-search";
 import {
   LazyCustomStarsBackgroundWithSuspense
 } from "@/components/lazy-components";
-import { PopularDevicesSection } from "@/components/popular-devices-section";
 import { getDeviceData, type Device, type DeviceData } from "@/lib/device-data";
 import {
   getAllStates,
@@ -174,28 +173,18 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-6xl mx-auto">
-            {/* Popular Devices - Takes up 4 columns on large screens */}
-            <div className="lg:col-span-4 order-2 lg:order-1">
-              <PopularDevicesSection
-                selectedDevice={selectedDevice}
-                onDeviceSelect={handleDeviceSelect}
-              />
-            </div>
-
-            {/* Main Calculator - Takes up 8 columns on large screens */}
-            <div className="lg:col-span-8 order-1 lg:order-2">
-              <Card className="shadow-2xl animate-scale-in card-interactive border border-white/10 bg-slate-900/50 backdrop-blur-xl h-full">
-                <CardHeader className="border-b border-white/5 pb-6">
-                  <h2 className="text-2xl font-semibold text-white flex items-center gap-2">
-                    <Calculator className="h-6 w-6 text-primary" />
-                    Calculate Tax
-                  </h2>
-                  <CardDescription className="text-slate-400 text-base">
-                    Select your state and enter an amount to see the breakdown
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-8 pt-6">
+          <div className="max-w-4xl mx-auto">
+            <Card className="shadow-2xl animate-scale-in card-interactive border border-white/10 bg-slate-900/50 backdrop-blur-xl">
+              <CardHeader className="border-b border-white/5 pb-6">
+                <h2 className="text-2xl font-semibold text-white flex items-center gap-2 justify-center text-center">
+                  <Calculator className="h-6 w-6 text-primary" />
+                  Calculate Tax
+                </h2>
+                <CardDescription className="text-slate-400 text-base text-center">
+                  Select your state and enter an amount to see the breakdown
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-8 pt-6">
                   {/* State Selection and Amount Input */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-3">
@@ -315,7 +304,6 @@ export default function Home() {
               </Card>
             </div>
           </div>
-        </div>
 
         {/* Footer */}
         <footer className="w-full py-6 mt-auto border-t border-white/5 bg-slate-950/30 backdrop-blur-sm relative z-10">
