@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useRef, useEffect, memo } from "react"
+import { useState, useMemo, useRef, useEffect, memo, useCallback } from "react"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -16,10 +16,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { flushSync } from "react-dom"
 import { searchDevices, getDeviceData, getAllDevices, initializeDeviceData, getLoadingStatus, retryLoading } from "@/lib/device-data"
+import type { DeviceData } from "@/lib/device-data"
 import { formatCurrency } from "@/lib/tax-data"
 import { useSearchHistory } from "@/hooks/useSearchHistory"
 import { ErrorState } from "@/components/error-state"
+
+const SEARCH_DEBOUNCE_MS = 40
+const DEFAULT_VISIBLE_DEVICES = 20
+const MAX_SEARCH_RESULTS = 100
 
 interface EnhancedDeviceSearchProps {
   value?: string
@@ -46,84 +52,121 @@ export const EnhancedDeviceSearch = memo(function EnhancedDeviceSearch({ value, 
   const [searchQuery, setSearchQuery] = useState("")
   const [debouncedQuery, setDebouncedQuery] = useState("")
   const [error, setError] = useState<string | null>(null)
+  const [deviceNames, setDeviceNames] = useState<string[]>([])
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
   
   const { 
     addToSearchHistory
   } = useSearchHistory()
-  
+
   // Initialize device data on mount
   useEffect(() => {
+    let isMounted = true
     const initData = async () => {
       try {
         setError(null);
         await initializeDeviceData();
+        if (!isMounted) return;
+        setDeviceNames(getAllDevices());
         const status = getLoadingStatus();
         if (status.lastError) {
           setError(status.lastError);
         }
       } catch (err) {
+        if (!isMounted) return;
         setError(err instanceof Error ? err.message : 'Failed to load device data');
       }
     };
 
     initData();
+    return () => {
+      isMounted = false;
+    }
   }, []);
 
   // Debounce search query for better performance
   useEffect(() => {
+    if (searchQuery === debouncedQuery) {
+      return;
+    }
+
     if (debounceRef.current) {
       clearTimeout(debounceRef.current)
     }
     
     debounceRef.current = setTimeout(() => {
       setDebouncedQuery(searchQuery)
-    }, 50) // 50ms debounce for instant visual feedback
+    }, SEARCH_DEBOUNCE_MS)
     
     return () => {
       if (debounceRef.current) {
         clearTimeout(debounceRef.current)
       }
     }
-  }, [searchQuery]);
+  }, [searchQuery, debouncedQuery]);
 
-  const allDevices = getAllDevices()
-  const searchResults = debouncedQuery ? searchDevices(debouncedQuery, 80) : allDevices.slice(0, 20)
   const selectedDevice = value ? getDeviceData(value) : null
+
+  const searchResults = useMemo(() => {
+    if (!debouncedQuery) {
+      return []
+    }
+    return searchDevices(debouncedQuery, 80, deviceNames)
+  }, [debouncedQuery, deviceNames])
 
   // Filter devices by debounced search query for better performance
   const filteredDevices = useMemo(() => {
-    const devicesToShow = debouncedQuery ? searchResults : allDevices.slice(0, 20);
-    return devicesToShow.slice(0, debouncedQuery ? 100 : 20);
-  }, [allDevices, searchResults, debouncedQuery]);
-
-  const handleSelect = (deviceName: string) => {
-    // Immediate state update for instant feedback
-    onSelect(deviceName);
-    if (searchQuery.trim()) {
-      addToSearchHistory(searchQuery, deviceName);
+    if (!open) {
+      return []
     }
-    // Use flushSync for immediate React updates
-    setOpen(false);
-  };
+
+    if (debouncedQuery) {
+      return searchResults.slice(0, MAX_SEARCH_RESULTS)
+    }
+
+    return deviceNames.slice(0, DEFAULT_VISIBLE_DEVICES)
+  }, [deviceNames, searchResults, debouncedQuery, open])
+
+  const deviceEntries = useMemo(() => {
+    if (!filteredDevices.length) return []
+
+    return filteredDevices.reduce<Array<{ name: string; data: DeviceData }>>((acc, deviceName) => {
+      const deviceData = getDeviceData(deviceName)
+      if (deviceData) {
+        acc.push({ name: deviceName, data: deviceData })
+      }
+      return acc
+    }, [])
+  }, [filteredDevices])
+
+  const handleSelect = useCallback((deviceName: string) => {
+    onSelect(deviceName)
+    if (searchQuery.trim()) {
+      addToSearchHistory(searchQuery, deviceName)
+    }
+    flushSync(() => setOpen(false))
+  }, [onSelect, addToSearchHistory, searchQuery])
+
+  const handleRetry = useCallback(async () => {
+    try {
+      setError(null)
+      await retryLoading()
+      setDeviceNames(getAllDevices())
+      const status = getLoadingStatus()
+      if (status.lastError) {
+        setError(status.lastError)
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to retry loading device data')
+    }
+  }, [])
 
   // Show error state if device data failed to load
   if (error) {
     return (
       <ErrorState
         error={error}
-        onRetry={async () => {
-          try {
-            setError(null);
-            await retryLoading();
-            const status = getLoadingStatus();
-            if (status.lastError) {
-              setError(status.lastError);
-            }
-          } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to retry loading device data');
-          }
-        }}
+        onRetry={handleRetry}
       />
     );
   }
@@ -175,11 +218,7 @@ export const EnhancedDeviceSearch = memo(function EnhancedDeviceSearch({ value, 
             heading="All Devices" 
             className="max-h-[min(45vh,320px)] sm:max-h-[min(50vh,360px)] lg:max-h-[min(55vh,400px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800 transform-gpu"
           >
-            {filteredDevices.map((deviceName) => {
-              const deviceData = getDeviceData(deviceName)
-              if (!deviceData) return null;
-              
-              return (
+            {deviceEntries.map(({ name: deviceName, data: deviceData }) => (
                 <CommandItem
                   key={deviceName}
                   value={deviceName}
@@ -213,8 +252,7 @@ export const EnhancedDeviceSearch = memo(function EnhancedDeviceSearch({ value, 
                     </div>
                   </div>
                 </CommandItem>
-              )
-            })}
+              ))}
           </CommandGroup>
         </Command>
       </PopoverContent>

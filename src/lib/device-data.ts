@@ -180,13 +180,14 @@ export function getAllDevices(): string[] {
  * @param limit - Maximum number of results
  * @returns Array of matching device names
  */
-export function searchDevices(query: string, limit: number = 50): string[] {
+export function searchDevices(query: string, limit: number = 50, sourceDevices?: string[]): string[] {
+  const devices = sourceDevices ?? getAllDevices();
+
   if (!query) {
-    return getAllDevices().slice(0, limit);
+    return devices.slice(0, limit);
   }
   
   const queryLower = query.toLowerCase();
-  const devices = getAllDevices();
   
   return devices
     .filter(device => device.toLowerCase().includes(queryLower))

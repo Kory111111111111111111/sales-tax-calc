@@ -47,8 +47,16 @@ export default function Home() {
   const [showWarningBanner, setShowWarningBanner] = useState<boolean>(true);
 
   // Memoize expensive calculations
-  const states = useMemo(() => getAllStates(), []);
+  const stateOptions = useMemo(() => (
+    getAllStates().map((state) => ({
+      name: state,
+      formattedRate: formatPercentage(getTaxRate(state))
+    }))
+  ), []);
   const taxRate = useMemo(() => getTaxRate(selectedState), [selectedState]);
+  const selectedStateOption = useMemo(() => (
+    stateOptions.find((option) => option.name === selectedState)
+  ), [stateOptions, selectedState]);
 
   // Update state selection and save to preferences
   const handleStateChange = useCallback((newState: string) => {
@@ -199,9 +207,11 @@ export default function Home() {
                             aria-expanded={openStateCombobox}
                             className="w-full justify-between bg-slate-950/50 border-white/10 text-slate-200 hover:bg-slate-800 hover:text-white h-11"
                           >
-                            {selectedState
-                              ? `${selectedState} (${formatPercentage(getTaxRate(selectedState))})`
-                              : "Select state..."}
+                            {selectedStateOption
+                              ? `${selectedStateOption.name} (${selectedStateOption.formattedRate})`
+                              : selectedState
+                                ? `${selectedState} (${formatPercentage(taxRate)})`
+                                : "Select state..."}
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
                         </PopoverTrigger>
@@ -210,13 +220,13 @@ export default function Home() {
                             <CommandInput placeholder="Search state..." className="h-11" />
                             <CommandList>
                               <CommandEmpty>No state found.</CommandEmpty>
-                              <CommandGroup>
-                                {states.map((state) => (
+                              <CommandGroup className="max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+                                {stateOptions.map(({ name: state, formattedRate }) => (
                                   <CommandItem
                                     key={state}
                                     value={state}
                                     onSelect={(currentValue) => {
-                                      handleStateChange(currentValue === selectedState ? "" : currentValue)
+                                      handleStateChange(currentValue)
                                       setOpenStateCombobox(false)
                                     }}
                                     className="text-slate-200 aria-selected:bg-slate-800 aria-selected:text-white"
@@ -229,7 +239,7 @@ export default function Home() {
                                     />
                                     {state}
                                     <span className="ml-auto text-slate-500 text-xs">
-                                      {formatPercentage(getTaxRate(state))}
+                                      {formattedRate}
                                     </span>
                                   </CommandItem>
                                 ))}
