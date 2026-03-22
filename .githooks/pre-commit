@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+
+# Local defense-in-depth check for suspicious repository tampering.
+# Enable with: npm run security:hooks:enable
+
+echo "[security] Running repository security check..."
+node scripts/security-check.js
+status=$?
+
+if [ $status -ne 0 ]; then
+  echo "[security] Commit blocked. Fix security check failures before committing."
+  exit $status
+fi
+
+exit 0

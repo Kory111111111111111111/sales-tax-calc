@@ -7,9 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "security:check": "node scripts/security-check.js",
+    "security:hooks:enable": "git config core.hooksPath .githooks",
+    "security:hooks:disable": "git config --unset core.hooksPath",
     "export": "next build && next export",
-    "deploy": "npm run build && touch out/.nojekyll",
-    "preinstall": "node preinstall.js"
+    "deploy": "npm run build && touch out/.nojekyll"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

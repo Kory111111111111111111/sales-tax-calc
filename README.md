@@ -91,6 +91,25 @@ The app is pre-configured with:
 - Dark mode support
 - Optimized images
 
+## 🔒 Security Guardrails
+
+This repository includes defense-in-depth controls to reduce supply-chain tampering risk:
+
+- **Automated security scanner**: `npm run security:check`
+   - Blocks risky npm lifecycle scripts (`preinstall`, `postinstall`, `install`, `prepare`, etc.) in root `package.json`
+   - Detects suspicious hook-like root files (`preinstall.js`, `postinstall.js`, etc.)
+   - Scans executable/config files for high-risk patterns (e.g., `eval`, runtime decryption primitives, hidden variation selectors)
+- **CI enforcement**:
+   - Security check runs in GitHub Actions on push and pull requests
+   - Deployment workflow installs with `npm ci --ignore-scripts` to prevent lifecycle-script execution in CI
+- **Optional local pre-commit guard**:
+   - Enable once per clone: `npm run security:hooks:enable`
+   - Disable if needed: `npm run security:hooks:disable`
+
+### Maintainer recommendation
+
+Use branch protection in GitHub settings with required pull request reviews and required status checks (including `Security Check`) for `master`.
+
 ## 📝 License
 
 This project is open source and available under the [MIT License](LICENSE).
