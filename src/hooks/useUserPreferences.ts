@@ -7,16 +7,12 @@ import { UserPreferences } from '@/types/features';
 
 const defaultPreferences: UserPreferences = {
   preferredState: 'Maine',
-  theme: 'system',
-  defaultView: 'calculator',
-  autoSaveCalculations: true,
 };
 
 export function useUserPreferences() {
   const [preferences, setPreferences] = useState<UserPreferences>(defaultPreferences);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load preferences from localStorage on mount
   useEffect(() => {
     const loadPreferences = () => {
       try {
@@ -34,7 +30,6 @@ export function useUserPreferences() {
     loadPreferences();
   }, []);
 
-  // Save preferences to localStorage whenever they change
   useEffect(() => {
     if (!isLoading) {
       LocalStorageCache.set(CACHE_KEYS.USER_PREFERENCES, preferences, CACHE_DURATION.USER_PREFERENCES);
@@ -51,13 +46,6 @@ export function useUserPreferences() {
     }));
   }, []);
 
-  const updatePreferences = useCallback((updates: Partial<UserPreferences>) => {
-    setPreferences(prev => ({
-      ...prev,
-      ...updates,
-    }));
-  }, []);
-
   const resetPreferences = useCallback(() => {
     setPreferences(defaultPreferences);
     LocalStorageCache.remove(CACHE_KEYS.USER_PREFERENCES);
@@ -67,7 +55,6 @@ export function useUserPreferences() {
     preferences,
     isLoading,
     updatePreference,
-    updatePreferences,
     resetPreferences,
   };
 }

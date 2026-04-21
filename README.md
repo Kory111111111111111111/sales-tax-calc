@@ -2,7 +2,7 @@
 
 I originally built this for internal use while I was working with a USCellular agency. After the T-Mobile acquisition, the old device-specific workflow stopped mattering, so I stripped that out and turned the project into a simple public sales tax calculator.
 
-Pick a state, enter an amount, and it will show the estimated tax and total.
+Pick a state, enter an amount, and it will show the estimated tax and total. Go nuts with it, its a pretty simple calculator. 
 
 ## Stack
 

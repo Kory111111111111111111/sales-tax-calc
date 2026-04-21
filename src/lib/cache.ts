@@ -1,10 +1,9 @@
-// Local storage utilities for caching and persistence
 import { logWarn } from './logger'
 
 export interface CacheItem<T> {
   data: T;
   timestamp: number;
-  expiresIn?: number; // milliseconds
+  expiresIn?: number;
 }
 
 export class LocalStorageCache {
@@ -34,7 +33,6 @@ export class LocalStorageCache {
 
       const cached: CacheItem<T> = JSON.parse(item);
       
-      // Check if expired
       if (cached.expiresIn && Date.now() - cached.timestamp > cached.expiresIn) {
         this.remove(key);
         return null;
@@ -72,14 +70,10 @@ export class LocalStorageCache {
   }
 }
 
-// Specific cache keys
 export const CACHE_KEYS = {
-  CALCULATION_HISTORY: 'sales-tax-calc:calculation-history',
   USER_PREFERENCES: 'sales-tax-calc:user-preferences',
 } as const;
 
-// Cache durations (in milliseconds)
 export const CACHE_DURATION = {
-  CALCULATION_HISTORY: 1000 * 60 * 60 * 24 * 30, // 30 days
-  USER_PREFERENCES: 1000 * 60 * 60 * 24 * 365, // 1 year
+  USER_PREFERENCES: 1000 * 60 * 60 * 24 * 365,
 } as const;

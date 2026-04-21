@@ -1,6 +1,5 @@
 import debug from 'debug';
 
-// Create debug instances for different modules
 export const logger = {
   cache: debug('sales-tax:cache'),
   error: debug('sales-tax:error'),
@@ -8,15 +7,12 @@ export const logger = {
   info: debug('sales-tax:info'),
 };
 
-// Enable error and warn logs by default in production
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
   debug.enable('sales-tax:error,sales-tax:warn');
 } else if (typeof window !== 'undefined') {
-  // In development, enable all logs
   debug.enable('sales-tax:*');
 }
 
-// Helper functions for consistent logging
 export const logError = (message: string, error?: unknown) => {
   logger.error(message, error);
 };

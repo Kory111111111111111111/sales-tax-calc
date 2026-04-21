@@ -50,7 +50,6 @@ export default function Home() {
   const [amount, setAmount] = useState<string>("");
   const [showWarningBanner, setShowWarningBanner] = useState<boolean>(true);
 
-  // Memoize expensive calculations
   const stateOptions = useMemo(() => (
     getAllStates().map((state) => ({
       name: state,
@@ -62,7 +61,6 @@ export default function Home() {
     stateOptions.find((option) => option.name === selectedState)
   ), [stateOptions, selectedState]);
 
-  // Update state selection and save to preferences
   const handleStateChange = useCallback((newState: string) => {
     setSelectedState(newState);
     updatePreference('preferredState', newState);
@@ -98,7 +96,6 @@ export default function Home() {
         starLayers={STAR_LAYERS}
       >
         <div className="container mx-auto px-4 py-6 relative z-10 flex-grow">
-          {/* Warning Banner */}
           {showWarningBanner && (
             <div className="mb-6 bg-[#4a0030]/85 border border-[#e20074]/60 text-white px-4 py-3 rounded-lg shadow-lg shadow-[#e20074]/20 relative backdrop-blur-md animate-fade-in text-left" style={{ verticalAlign: 'top' }}>
               <button
@@ -109,16 +106,15 @@ export default function Home() {
                 <X className="h-4 w-4" />
               </button>
               <div className="flex items-center gap-3 pr-8">
-                <span className="text-xl">⚠️</span>
-                <p className="text-center text-sm font-bold leading-relaxed">
-                  <span className="font-bold block mb-1">Updated Notice</span>
-                  This calculator has been simplified into a general-purpose sales tax tool. Enter any amount manually to get a fast state sales tax estimate.
+                <span className="shrink-0 text-xl">⚠️</span>
+                <p className="flex-1 text-center text-sm font-bold leading-relaxed">
+                  <span className="font-bold block mb-1">Deprecation Notice</span>
+                  Due to T-Mobile ending all USCellular Sales, this tool will be deprecated on May 1st, 2026. The site will still be accessible, but you will need to manually enter in the MSRP for the device you need sales tax information for. For any questions reach out to kory@wavfinaudio.com
                 </p>
               </div>
             </div>
           )}
 
-          {/* Main Header */}
           <div className="text-center mb-8">
             <AuroraText className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight tracking-tight">
               Sales Tax Calculator
@@ -140,7 +136,6 @@ export default function Home() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-8 pt-6">
-                  {/* State Selection and Amount Input */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-3">
                       <Label className="text-sm font-medium text-slate-300">
@@ -165,9 +160,9 @@ export default function Home() {
                         <PopoverContent className="w-[300px] p-0 bg-slate-900 border border-white/10 shadow-xl transform-gpu">
                           <Command className="bg-transparent text-slate-100">
                             <CommandInput placeholder="Search state..." className="h-11 placeholder:text-slate-500" />
-                            <CommandList className="max-h-[min(45vh,320px)] sm:max-h-[min(50vh,360px)] lg:max-h-[min(55vh,400px)] overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+                            <CommandList className="max-h-none overflow-hidden">
                               <CommandEmpty>No state found.</CommandEmpty>
-                              <CommandGroup>
+                              <CommandGroup className="max-h-[min(45vh,320px)] sm:max-h-[min(50vh,360px)] lg:max-h-[min(55vh,400px)] overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
                                 {stateOptions.map(({ name: state, formattedRate }) => (
                                   <CommandItem
                                     key={state}
@@ -214,7 +209,6 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* Results */}
                   <div className="space-y-4">
                     {currentAmount > 0 ? (
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
@@ -247,13 +241,12 @@ export default function Home() {
             </div>
           </div>
 
-        {/* Footer */}
-        <footer className="w-full py-6 mt-auto border-t border-white/5 bg-slate-950/30 backdrop-blur-sm relative z-10">
-          <div className="container mx-auto px-4 text-center">
+        <footer className="w-full py-3 mt-auto border-t border-white/5 bg-slate-950/30 backdrop-blur-sm relative z-10">
+          <div className="container mx-auto px-4 text-center sm:flex sm:items-center sm:justify-center sm:gap-3">
             <p className="text-xs text-slate-600">
               Tax rates are estimates and may vary. Always verify with official sources.
             </p>
-            <p className="text-xs text-slate-500 mt-2">
+            <p className="text-xs text-slate-500 mt-1 sm:mt-0">
               Powered by{" "}
               <a
                 href="https://wavfinaudio.com"
