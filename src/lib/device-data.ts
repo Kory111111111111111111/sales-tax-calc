@@ -143,28 +143,6 @@ export function getDeviceData(deviceName: string): DeviceData | null {
 }
 
 /**
- * Get device MSRP price
- * 
- * @param deviceName - Name of the device
- * @returns MSRP price or 0 if not found
- */
-export function getDevicePrice(deviceName: string): number {
-  const deviceData = getDeviceData(deviceName);
-  return deviceData?.msrp || 0;
-}
-
-/**
- * Get device prepaid price
- * 
- * @param deviceName - Name of the device
- * @returns Prepaid price or null if not available
- */
-export function getDevicePrepaidPrice(deviceName: string): number | null {
-  const deviceData = getDeviceData(deviceName);
-  return deviceData?.prepaid || null;
-}
-
-/**
  * Get list of all device names
  * 
  * @returns Array of device names

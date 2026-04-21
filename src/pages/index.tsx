@@ -66,7 +66,7 @@ export default function Home() {
   }, [updatePreference]);
 
   // Calculate current amount (either manual input or device price)
-  const getCurrentAmount = useCallback((): number => {
+  const currentAmount = useMemo((): number => {
     if (useDevicePrice && selectedDevice) {
       const deviceData = getDeviceData(selectedDevice);
       if (deviceData) {
@@ -76,8 +76,6 @@ export default function Home() {
     return parseFloat(amount) || 0;
   }, [useDevicePrice, selectedDevice, usePrepaidPrice, amount]);
 
-  // Memoize current amount and tax calculation
-  const currentAmount = useMemo(() => getCurrentAmount(), [getCurrentAmount]);
   const taxCalculation = useMemo(() => calculateSalesTax(currentAmount, taxRate), [currentAmount, taxRate]);
 
   const handleDeviceSelect = useCallback((deviceOrName: Device | string) => {
@@ -107,20 +105,6 @@ export default function Home() {
     setSelectedDevice("");
     setUsePrepaidPrice(false);
   }, []);
-
-  // Function for future prepaid pricing toggle feature
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handlePrepaidToggle = useCallback(() => {
-    if (selectedDevice && useDevicePrice) {
-      const deviceData = getDeviceData(selectedDevice);
-      if (deviceData) {
-        const newUsePrepaid = !usePrepaidPrice;
-        setUsePrepaidPrice(newUsePrepaid);
-        const newPrice = newUsePrepaid && deviceData.prepaid ? deviceData.prepaid : deviceData.msrp;
-        setAmount(newPrice.toString());
-      }
-    }
-  }, [selectedDevice, useDevicePrice, usePrepaidPrice]);
 
   const handleCloseBanner = useCallback(() => {
     setShowWarningBanner(false);
@@ -153,19 +137,19 @@ export default function Home() {
         <div className="container mx-auto px-4 py-6 relative z-10 flex-grow">
           {/* Warning Banner */}
           {showWarningBanner && (
-            <div className="mb-6 bg-red-950/80 border border-red-500/50 text-white px-4 py-3 rounded-lg shadow-lg relative backdrop-blur-md animate-fade-in text-left" style={{ verticalAlign: 'top' }}>
+            <div className="mb-6 bg-[#4a0030]/85 border border-[#e20074]/60 text-white px-4 py-3 rounded-lg shadow-lg shadow-[#e20074]/20 relative backdrop-blur-md animate-fade-in text-left" style={{ verticalAlign: 'top' }}>
               <button
                 onClick={handleCloseBanner}
-                className="absolute top-2 right-2 p-1 hover:bg-red-500/40 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500/50"
+                className="absolute top-2 right-2 p-1 hover:bg-[#e20074]/35 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#e20074]/50"
                 aria-label="Close warning banner"
               >
                 <X className="h-4 w-4" />
               </button>
-              <div className="flex items-start gap-3 pr-8">
+              <div className="flex items-center gap-3 pr-8">
                 <span className="text-xl">⚠️</span>
-                <p className="text-sm font-medium leading-relaxed">
-                  <span className="font-bold block mb-1">Important Notice</span>
-                  Before using this tool, verify you are working with a UScellular customer. Information provided here may not apply to other carriers.
+                <p className="text-center text-sm font-bold leading-relaxed">
+                  <span className="font-bold block mb-1">Deprecation Notice</span>
+                  Due to T-Mobile ending all USCellular Sales, this tool will be deprecated on May 1st, 2026. You will need to manually enter in the MSRP for the device you need sales tax information for.
                 </p>
               </div>
             </div>
@@ -218,16 +202,15 @@ export default function Home() {
                         <PopoverContent className="w-[300px] p-0 bg-slate-900 border border-white/10 shadow-xl transform-gpu">
                           <Command className="bg-transparent text-slate-100">
                             <CommandInput placeholder="Search state..." className="h-11 placeholder:text-slate-500" />
-                            <CommandList>
+                            <CommandList className="max-h-[min(45vh,320px)] sm:max-h-[min(50vh,360px)] lg:max-h-[min(55vh,400px)] overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
                               <CommandEmpty>No state found.</CommandEmpty>
-                              <CommandGroup className="max-h-[min(45vh,320px)] sm:max-h-[min(50vh,360px)] lg:max-h-[min(55vh,400px)] overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent transform-gpu">
+                              <CommandGroup>
                                 {stateOptions.map(({ name: state, formattedRate }) => (
                                   <CommandItem
                                     key={state}
                                     value={state}
                                     onSelect={(currentValue) => {
                                       handleStateChange(currentValue)
-                                      setOpenStateCombobox(false)
                                     }}
                                     className="text-slate-200 aria-selected:bg-slate-800 aria-selected:text-white"
                                   >

@@ -23,26 +23,8 @@ let deviceCache: Record<string, DeviceData> | null = null;
 let lastFetchTime: number = 0;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-/**
- * Process data in chunks to avoid blocking the main thread
- */
-function processInChunks<T, R>(
-  items: T[],
-  processor: (item: T) => R | null,
-  chunkSize: number = 50
-): Promise<R[]> {
-  return new Promise((resolve) => {
-    const results: R[] = [];
-
-    // Process synchronously in reasonable chunks
-    for (let i = 0; i < items.length; i += chunkSize) {
-      const chunk = items.slice(i, i + chunkSize);
-      const chunkResults = chunk.map(processor).filter(result => result !== null);
-      results.push(...chunkResults);
-    }
-
-    resolve(results as R[]);
-  });
+function processItems<T, R>(items: T[], processor: (item: T) => R | null): R[] {
+  return items.map(processor).filter((r): r is R => r !== null);
 }
 
 /**
@@ -203,7 +185,7 @@ function parsePrice(priceStr: string | number): number {
 /**
  * Process raw CSV data into device data structure (optimized)
  */
-async function processDeviceData(rawData: RawDeviceRow[]): Promise<Record<string, DeviceData>> {
+function processDeviceData(rawData: RawDeviceRow[]): Record<string, DeviceData> {
   if (rawData.length === 0) return {};
   
   const headers = Object.keys(rawData[0]);
@@ -216,8 +198,7 @@ async function processDeviceData(rawData: RawDeviceRow[]): Promise<Record<string
     return {};
   }
   
-  // Process data in chunks to avoid blocking the main thread
-  const deviceEntries = await processInChunks(rawData, (row: RawDeviceRow) => {
+  const deviceEntries = processItems(rawData, (row: RawDeviceRow) => {
     try {
       const phoneName = String(row[phoneCol] || '').trim();
       const msrpValue = row[msrpCol];
@@ -254,7 +235,7 @@ async function processDeviceData(rawData: RawDeviceRow[]): Promise<Record<string
     } catch {
       return null;
     }
-  }, 25); // Smaller chunks for better responsiveness
+  });
   
   const devices = Object.fromEntries(deviceEntries);
   return devices;
@@ -325,7 +306,7 @@ export async function fetchDevicesFromGoogleSheets(): Promise<Record<string, Dev
     }
     
     const rawData = parseCSV(csvText);
-    const devices = await processDeviceData(rawData);
+    const devices = processDeviceData(rawData);
     
     // Update cache
     deviceCache = devices;
