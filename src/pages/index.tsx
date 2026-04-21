@@ -4,14 +4,11 @@ import { Calculator, X, Check, ChevronsUpDown, DollarSign } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { AuroraText } from "@/components/ui/aurora-text";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
-import { EnhancedDeviceSearch } from "@/components/enhanced-device-search";
 import {
   LazyCustomStarsBackgroundWithSuspense
 } from "@/components/lazy-components";
-import { getDeviceData, type Device, type DeviceData } from "@/lib/device-data";
 import {
   getAllStates,
   getTaxRate,
@@ -41,9 +38,6 @@ export default function Home() {
   const [selectedState, setSelectedState] = useState<string>(preferences.preferredState || "Maine");
   const [openStateCombobox, setOpenStateCombobox] = useState(false);
   const [amount, setAmount] = useState<string>("");
-  const [selectedDevice, setSelectedDevice] = useState<string>("");
-  const [useDevicePrice, setUseDevicePrice] = useState<boolean>(false);
-  const [usePrepaidPrice, setUsePrepaidPrice] = useState<boolean>(false);
   const [showWarningBanner, setShowWarningBanner] = useState<boolean>(true);
 
   // Memoize expensive calculations
@@ -65,45 +59,12 @@ export default function Home() {
     setOpenStateCombobox(false);
   }, [updatePreference]);
 
-  // Calculate current amount (either manual input or device price)
-  const currentAmount = useMemo((): number => {
-    if (useDevicePrice && selectedDevice) {
-      const deviceData = getDeviceData(selectedDevice);
-      if (deviceData) {
-        return usePrepaidPrice && deviceData.prepaid ? deviceData.prepaid : deviceData.msrp;
-      }
-    }
-    return parseFloat(amount) || 0;
-  }, [useDevicePrice, selectedDevice, usePrepaidPrice, amount]);
+  const currentAmount = useMemo((): number => parseFloat(amount) || 0, [amount]);
 
   const taxCalculation = useMemo(() => calculateSalesTax(currentAmount, taxRate), [currentAmount, taxRate]);
 
-  const handleDeviceSelect = useCallback((deviceOrName: Device | string) => {
-    let deviceName: string;
-    let deviceData: DeviceData | null;
-
-    // Handle both Device object and string input
-    if (typeof deviceOrName === 'string') {
-      deviceName = deviceOrName;
-      deviceData = getDeviceData(deviceName);
-    } else {
-      deviceName = deviceOrName.name;
-      deviceData = deviceOrName.data;
-    }
-
-    if (deviceData && deviceData.msrp) {
-      setSelectedDevice(deviceName);
-      setUseDevicePrice(true);
-      setUsePrepaidPrice(false);
-      setAmount(deviceData.msrp.toString());
-    }
-  }, []);
-
   const handleManualAmountChange = useCallback((value: string) => {
     setAmount(value);
-    setUseDevicePrice(false);
-    setSelectedDevice("");
-    setUsePrepaidPrice(false);
   }, []);
 
   const handleCloseBanner = useCallback(() => {
@@ -114,8 +75,8 @@ export default function Home() {
     <>
       <Head>
         <title>Sales Tax Calculator - Calculate US State Sales Tax</title>
-        <meta name="description" content="Free sales tax calculator for US states. Calculate sales tax on mobile devices and manual amounts. Supports all 50 states with accurate tax rates." />
-        <meta name="keywords" content="sales tax calculator, US tax calculator, state sales tax, mobile device tax, tax calculation tool" />
+        <meta name="description" content="Free sales tax calculator for US states. Enter any amount manually and calculate state sales tax with an instant breakdown." />
+        <meta name="keywords" content="sales tax calculator, US tax calculator, state sales tax, manual tax calculator, tax calculation tool" />
         <meta name="author" content="Sales Tax Calculator" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
@@ -148,8 +109,8 @@ export default function Home() {
               <div className="flex items-center gap-3 pr-8">
                 <span className="text-xl">⚠️</span>
                 <p className="text-center text-sm font-bold leading-relaxed">
-                  <span className="font-bold block mb-1">Deprecation Notice</span>
-                  Due to T-Mobile ending all USCellular Sales, this tool will be deprecated on May 1st, 2026. You will need to manually enter in the MSRP for the device you need sales tax information for.
+                  <span className="font-bold block mb-1">Updated Notice</span>
+                  This calculator has been simplified into a general-purpose sales tax tool. Enter any amount manually to get a fast state sales tax estimate.
                 </p>
               </div>
             </div>
@@ -161,7 +122,7 @@ export default function Home() {
               Sales Tax Calculator
             </AuroraText>
             <p className="text-base md:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
-              Calculate US state sales tax instantly. Enter an amount or select a device to get started.
+              Calculate US state sales tax instantly. Enter an amount to get a fast, state-based tax breakdown.
             </p>
           </div>
 
@@ -251,20 +212,6 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* Device Search */}
-                  <div className="space-y-3">
-                    <Label className="text-sm font-medium text-slate-300">
-                      Or Select a Device
-                    </Label>
-                    <EnhancedDeviceSearch
-                      value={selectedDevice}
-                      onSelect={handleDeviceSelect}
-                      placeholder="Search for a device..."
-                    />
-                  </div>
-
-                  <Separator className="bg-white/10" />
-
                   {/* Results */}
                   <div className="space-y-4">
                     {currentAmount > 0 ? (
@@ -289,7 +236,7 @@ export default function Home() {
                     ) : (
                       <div className="text-center py-8 text-slate-500">
                         <Calculator className="h-10 w-10 mx-auto mb-4 opacity-20" />
-                        <p className="text-base">Enter an amount or select a device to see tax calculation</p>
+                        <p className="text-base">Enter an amount to see the tax calculation</p>
                       </div>
                     )}
                   </div>

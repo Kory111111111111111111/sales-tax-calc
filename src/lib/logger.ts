@@ -2,8 +2,6 @@ import debug from 'debug';
 
 // Create debug instances for different modules
 export const logger = {
-  googleSheets: debug('sales-tax:google-sheets'),
-  deviceData: debug('sales-tax:device-data'),
   cache: debug('sales-tax:cache'),
   error: debug('sales-tax:error'),
   warn: debug('sales-tax:warn'),

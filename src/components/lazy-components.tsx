@@ -2,7 +2,6 @@ import { lazy, Suspense, type ReactNode } from 'react';
 
 // Lazy load heavy components that are not immediately visible
 export const LazyCalculationHistory = lazy(() => import('@/components/calculation-history').then(module => ({ default: module.CalculationHistory })));
-export const LazyEnhancedDeviceSearch = lazy(() => import('@/components/enhanced-device-search').then(module => ({ default: module.EnhancedDeviceSearch })));
 export const LazyCustomStarsBackground = lazy(() => import('@/components/custom-stars-background').then(module => ({ default: module.CustomStarsBackground })));
 
 // Wrapper components with suspense and fallbacks
@@ -10,18 +9,6 @@ export function LazyCalculationHistoryWithSuspense(props: React.ComponentProps<t
   return (
     <Suspense fallback={<div className="h-8 w-24 bg-gray-200 animate-pulse rounded" />}>
       <LazyCalculationHistory {...props} />
-    </Suspense>
-  );
-}
-
-export function LazyEnhancedDeviceSearchWithSuspense(props: React.ComponentProps<typeof LazyEnhancedDeviceSearch>) {
-  return (
-    <Suspense fallback={
-      <div className="animate-pulse border rounded-lg p-3 bg-muted/20">
-        <div className="h-9 bg-muted/40 rounded"></div>
-      </div>
-    }>
-      <LazyEnhancedDeviceSearch {...props} />
     </Suspense>
   );
 }

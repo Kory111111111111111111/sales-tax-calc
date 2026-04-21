@@ -74,16 +74,12 @@ export class LocalStorageCache {
 
 // Specific cache keys
 export const CACHE_KEYS = {
-  DEVICE_DATA: 'sales-tax-calc:device-data',
-  SEARCH_HISTORY: 'sales-tax-calc:search-history',
   CALCULATION_HISTORY: 'sales-tax-calc:calculation-history',
   USER_PREFERENCES: 'sales-tax-calc:user-preferences',
 } as const;
 
 // Cache durations (in milliseconds)
 export const CACHE_DURATION = {
-  DEVICE_DATA: 1000 * 60 * 60 * 24, // 24 hours
-  SEARCH_HISTORY: 1000 * 60 * 60 * 24 * 7, // 7 days
   CALCULATION_HISTORY: 1000 * 60 * 60 * 24 * 30, // 30 days
   USER_PREFERENCES: 1000 * 60 * 60 * 24 * 365, // 1 year
 } as const;
