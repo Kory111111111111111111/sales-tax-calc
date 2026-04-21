@@ -106,20 +106,59 @@ function CustomStarsBackground({
 }: CustomStarsBackgroundProps) {
   const offsetX = useMotionValue(1);
   const offsetY = useMotionValue(1);
+  const frameRef = React.useRef<number | null>(null);
+  const pointerRef = React.useRef({ x: 0, y: 0 });
+  const [enableParallax, setEnableParallax] = React.useState(false);
 
   const springX = useSpring(offsetX, transition);
   const springY = useSpring(offsetY, transition);
 
+  React.useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return;
+    }
+
+    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const finePointerQuery = window.matchMedia('(pointer: fine)');
+
+    const updateParallaxState = () => {
+      setEnableParallax(!reducedMotionQuery.matches && finePointerQuery.matches);
+    };
+
+    updateParallaxState();
+    reducedMotionQuery.addEventListener?.('change', updateParallaxState);
+    finePointerQuery.addEventListener?.('change', updateParallaxState);
+
+    return () => {
+      reducedMotionQuery.removeEventListener?.('change', updateParallaxState);
+      finePointerQuery.removeEventListener?.('change', updateParallaxState);
+      if (frameRef.current !== null) {
+        cancelAnimationFrame(frameRef.current);
+      }
+    };
+  }, []);
+
   const handleMouseMove = React.useCallback(
     (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-      const centerX = window.innerWidth / 2;
-      const centerY = window.innerHeight / 2;
-      const newOffsetX = -(e.clientX - centerX) * factor;
-      const newOffsetY = -(e.clientY - centerY) * factor;
-      offsetX.set(newOffsetX);
-      offsetY.set(newOffsetY);
+      if (!enableParallax) {
+        return;
+      }
+
+      pointerRef.current = { x: e.clientX, y: e.clientY };
+      if (frameRef.current !== null) {
+        return;
+      }
+
+      frameRef.current = requestAnimationFrame(() => {
+        frameRef.current = null;
+        const { x, y } = pointerRef.current;
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+        offsetX.set(-(x - centerX) * factor);
+        offsetY.set(-(y - centerY) * factor);
+      });
     },
-    [offsetX, offsetY, factor],
+    [enableParallax, factor, offsetX, offsetY],
   );
 
   return (

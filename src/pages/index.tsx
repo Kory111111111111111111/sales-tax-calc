@@ -32,6 +32,16 @@ import {
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
+const STAR_LAYERS = [
+  { count: 3000, size: 0.5, speedMultiplier: 0.5 },
+  { count: 2000, size: 1, speedMultiplier: 1 },
+  { count: 1200, size: 1.5, speedMultiplier: 1.5 },
+  { count: 800, size: 2, speedMultiplier: 2 },
+  { count: 400, size: 2.5, speedMultiplier: 2.5 },
+  { count: 200, size: 3, speedMultiplier: 3 },
+  { count: 100, size: 4, speedMultiplier: 4 },
+];
+
 export default function Home() {
   const { preferences, updatePreference } = useUserPreferences();
 
@@ -85,15 +95,7 @@ export default function Home() {
         starColor="rgba(147, 197, 253, 0.6)"
         speed={60}
         factor={0.03}
-        starLayers={[
-          { count: 3000, size: 0.5, speedMultiplier: 0.5 },
-          { count: 2000, size: 1, speedMultiplier: 1 },
-          { count: 1200, size: 1.5, speedMultiplier: 1.5 },
-          { count: 800, size: 2, speedMultiplier: 2 },
-          { count: 400, size: 2.5, speedMultiplier: 2.5 },
-          { count: 200, size: 3, speedMultiplier: 3 },
-          { count: 100, size: 4, speedMultiplier: 4 },
-        ]}
+        starLayers={STAR_LAYERS}
       >
         <div className="container mx-auto px-4 py-6 relative z-10 flex-grow">
           {/* Warning Banner */}
